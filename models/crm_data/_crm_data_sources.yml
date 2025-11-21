@@ -1,0 +1,468 @@
+version: 2
+
+sources:
+
+  - name: crm_data # name of the source
+    description: >
+      To be completed
+    schema: crm_raw_data # this is the schema our raw data lives in
+    database: "PROJECT_DEV_BRONZE_DB"  # this is the name of our database
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+
+    tables:
+
+      - name: contracts
+        description: >
+          To be completed
+        columns:
+          - name: id
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - unique
+              - not_null
+          - name: contractID
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - unique
+              - not_null
+          - name: contractedPower
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - positive_values
+              - not_null
+          - name: cups
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - unique
+              - not_null
+          - name: distributorId
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: economicActivity
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: endDate
+            data_type: timestamp
+            description: >
+              To be completed
+          - name: initDate
+            data_type: timestamp
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: policyCode
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: responsibleEnergyContract
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: servicePointMunicipality
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: servicePointZipCode
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: status
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: tariff
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: technologyEM
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: tensionLevelMeasurePoint
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: tensionLevelServicePoint
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: version
+            data_type: integer
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              To be completed
+            data_tests:
+              - not_null          
+        config:
+          loaded_at_field: data_ingest
+      - name: punto_dc
+        columns:
+          - name: CUPS
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: "Coordenada X"
+            data_type: varchar
+            description: >
+              To be completed
+          - name: "Coordenada Y"
+            data_type: varchar
+            description: >
+              To be completed
+          - name: "Coordenada Z"
+            data_type: varchar
+            description: >
+              To be completed
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              To be completed
+            data_tests:
+              - not_null          
+        config:
+          loaded_at_field: data_ingest
+      - name: selfconsumption
+        columns:
+          - name: id
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: antispill_type
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: cau_ID
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: cau_config_ID
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: compensation
+            data_type: boolean
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: conf_type
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: conn_type
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: consumer_type
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: creation_date
+            data_type: timestamp
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: cups
+            data_type: array
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: distributor
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: distributor_id
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: end_date
+            data_type: timestamp
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: excedents
+            data_type: boolean
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: generation_pot
+            data_type: float
+            description: >
+              To be completed
+          - name: group_subgroup
+            data_type: float
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: group_subgroup_desc
+            data_type: varchar
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: pointType
+            data_type: varchar
+            description: >
+              To be completed
+          - name: init_date
+            data_type: timestamp
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: name
+            data_type: varchar
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: participant_number
+            data_type: integer
+            description: >
+              To be completed
+          - name: solar_zone
+            data_type: variant
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: ssaa
+            data_type: boolean
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: status
+            data_type: variant
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: technology_type
+            data_type: variant
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: unit_type
+            data_type: variant
+            description: >
+              To be completed    
+            data_tests:
+              - not_null                                            
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              To be completed
+            data_tests:
+              - not_null         
+        config:
+          loaded_at_field: data_ingest
+      - name: supply_points
+        columns:
+          - name: id
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: address
+            data_type: variant
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: concId
+            data_type: varchar
+            description: >
+              To be completed
+          - name: ctCode
+            data_type: varchar
+            description: >
+              To be completed
+          - name: ctName
+            data_type: varchar
+            description: >
+              To be completed      
+          - name: cups
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: distributorCdos
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null  
+          - name: distributorId
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: lineCode
+            data_type: varchar
+            description: >
+              To be completed
+          - name: measureTensionLevel
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: meterSerialNumber
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: meterTechCode
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: meterTechName
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: name
+            data_type: varchar
+            description: >
+              To be completed
+          - name: phase
+            data_type: varchar
+            description: >
+              To be completed
+          - name: pointTensionLevel
+            data_type: varchar
+            description: >
+              To be completed
+            data_tests:
+              - not_null
+          - name: pointType
+            data_type: varchar
+            description: >
+              To be completed
+          - name: recognizedPower
+            data_type: integer
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: serviceType
+            data_type: varchar
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: pointType
+            data_type: varchar
+            description: >
+              To be completed
+          - name: solarZone
+            data_type: integer
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: tensionSection
+            data_type: float
+            description: >
+              To be completed    
+            data_tests:
+              - not_null
+          - name: trafoCode
+            data_type: varchar
+            description: >
+              To be completed
+          - name: transNomDemand
+            data_type: float
+            description: >
+              To be completed    
+            data_tests:
+              - not_null                                            
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              To be completed
+            data_tests:
+              - not_null         
+        config:
+          loaded_at_field: data_ingest          
+    config:
+      freshness:
+        warn_after: {count: 365, period: day}
+        error_after: {count: 730, period: day}
