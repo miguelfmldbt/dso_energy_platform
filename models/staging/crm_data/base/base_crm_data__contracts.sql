@@ -21,7 +21,6 @@ renamed_casted AS (
         id AS contract_id
         , contractedPower
         , cups AS supplyPoint
-        , distributorId
         , economicActivity
         , CONVERT_TIMEZONE('UTC', endDate) AS end_date
         , CAST(energyProviderName AS VARCHAR) AS energy_provider_name

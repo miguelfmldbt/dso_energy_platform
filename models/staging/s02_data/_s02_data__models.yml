@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: s02
+    description: >
+      Curated (silver) version of hourly energetic data data. 
+      Includes type casting, standardized field names, and UTC timestamps.
+    config:
+      contracts:
+        enforced: true 
+    constraints:
+      - type: primary_key
+        columns: [energy_id]     
+    
+    columns:
+      - name: energy_id
+        data_type: varchar
+        description: >
+          UUID of each energy data
+        data_tests:
+              - unique
+              - not_null
+
+      - name: meter_id
+        data_type: varchar
+        description: >
+          Surrogate key of the smart meter that registered energy data.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__meters')
+                field: meter_id
+        constraints:
+          - type: foreign_key
+            to: ref('stg_crm_data__meters')
+            column: meter_id
+
+      - name: concentrator
+        data_type: varchar
+        description: >
+          Identifier of the concentrator device that aggregated this event.
+        data_tests:
+          - not_null
+
+      - name: energy_timestamp
+        data_type: timestamp_tz
+        description: >
+          Timestamp when the energy was registered, normalized to UTC.
+        data_tests:
+          - not_null 
+
+      - name: active_exported_energy_Wh
+        data_type: float
+        description: >
+          Value of active energy (Wh) exported by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: active_exported_energy_Wh >= 0
+
+      - name: active_imported_energy_Wh
+        data_type: float
+        description: >
+          Value of active energy (Wh) imported by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: active_imported_energy_Wh >= 0
+
+      - name: reactive_energy_q1_VAr
+        data_type: float
+        description: >
+          Value of reactive energy (VAr) from quadrant 1 exchanged by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: reactive_energy_q1_VAr >= 0
+
+      - name: reactive_energy_q2_VAr
+        data_type: float
+        description: >
+          Value of reactive energy (VAr) from quadrant 2 exchanged by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: reactive_energy_q2_VAr >= 0         
+
+      - name: reactive_energy_q3_VAr
+        data_type: float
+        description: >
+          Value of reactive energy (VAr) from quadrant 3 exchanged by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: reactive_energy_q3_VAr >= 0
+
+      - name: reactive_energy_q4_VAr
+        data_type: float
+        description: >
+          Value of reactive energy (VAr) from quadrant 4 exchanged by the supply point.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: reactive_energy_q4_VAr >= 0
+
+      - name: data_ingest
+        data_type: timestamp_tz
+        description: >
+          Timestamp when the raw S02 data was ingested into bronze (UTC).
+        data_tests:
+          - not_null 

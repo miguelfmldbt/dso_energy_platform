@@ -29,6 +29,6 @@ silver_selfconsumptions AS (
     LEFT JOIN LATERAL FLATTEN(
         input => t.cups,
         OUTER => TRUE
-    ) AS f;
+    ) AS f
 )
 SELECT * FROM silver_selfconsumptions

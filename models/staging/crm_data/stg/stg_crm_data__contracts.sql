@@ -3,7 +3,7 @@
         materialized='table'
     )
 }}
-WITH stg_contracts AS (
+WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__contracts') }}
 
@@ -20,7 +20,6 @@ silver_contracts AS (
         , end_date
         , init_date
         , contract_status
-        , tensionLevelMeasurePoint
-    FROM stg_contracts
+    FROM base
     )
 SELECT * FROM silver_contracts

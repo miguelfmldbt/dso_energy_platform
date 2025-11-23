@@ -2,7 +2,7 @@
     config(
         materialized='incremental',
         unique_key = 'selfconsumption_id',
-        on_schema_change='sync'
+        on_schema_change='fail'
     )
 }}
 

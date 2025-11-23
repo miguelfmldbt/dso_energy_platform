@@ -19,15 +19,14 @@ WITH src_s09 AS (
     ),
 silver_s09 AS (
     SELECT
-        MD5(Cnt || '|' || LEFT(FH,17) || '|' || dso || '|' || data_ingest) AS quality_event_id
+        MD5(Cnt || '|' || LEFT(FH,17) || '|' || dso) AS quality_event_id
         , MD5(Cnt || '|' || dso) AS meter_id
         , CAST(Cnc AS VARCHAR) AS concentrator
         , CONVERT_TIMEZONE('Europe/Madrid','UTC',TO_TIMESTAMP(LEFT(FH, LENGTH(FH) - 1),'YYYYMMDDHH24MISSFF3')) AS quality_event_timestamp
         , CAST(Et AS INTEGER) AS quality_event_group
-        , CASE
-            WHEN C IN ()
-        , CONVERT_TIMEZONE('Europe/Madrid','UTC',TO_TIMESTAMP(LEFT(FH, LENGTH(D1) - 1),'YYYYMMDDHH24MISSFF3')) AS quality_event_finish
+        , CAST(C AS INTEGER) AS quality_event_type
+        , CONVERT_TIMEZONE('Europe/Madrid','UTC',TO_TIMESTAMP(LEFT(FH, LENGTH(D1) - 1),'YYYYMMDDHH24MISSFF3')) AS quality_event_start
         , CONVERT_TIMEZONE('UTC', data_ingest) AS data_ingest
-    FROM silver_s09
+    FROM src_s09
     )
-SELECT * FROM base_s09
+SELECT * FROM silver_s09
