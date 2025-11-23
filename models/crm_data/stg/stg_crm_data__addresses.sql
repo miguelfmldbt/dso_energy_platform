@@ -1,4 +1,9 @@
-WITH stg_address AS (
+{{
+    config(
+        materialized='table'
+    )
+}}
+WITH base AS (
     SELECT *
     FROM {{ ref('base_crm_data__supply_points') }}
 ),
@@ -14,7 +19,7 @@ clean AS (
     , CAST(address:portal AS VARCHAR) AS portal
     , CAST(address:floor AS VARCHAR) AS floor
     , CAST(address:letter AS VARCHAR) AS letter
-    , data_ingest
+    FROM base
 ),
 silver_address AS (
     SELECT
@@ -27,7 +32,6 @@ silver_address AS (
         , postal_code
         , type_address
         , phone
-        , data_ingest
     FROM clean
 )
 

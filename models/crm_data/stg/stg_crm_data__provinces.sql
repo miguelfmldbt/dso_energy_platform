@@ -1,3 +1,9 @@
+{{
+    config(
+        materialized='table'
+    )
+}}
+
 WITH base AS (
     SELECT *
     FROM {{ ref('base_crm_data__supply_points') }}
@@ -5,14 +11,14 @@ WITH base AS (
 clean AS (
     SELECT DISTINCT
     COALESCE(NULLIF(INITCAP(TRIM(CAST(address:province AS VARCHAR))), ''),'Unknown') AS province_name
-    , COALESCE(NULLIF(INITCAP(TRIM(CAST(address:provinceIneCode AS VARCHAR))), ''),'Unknown') AS province_ine_code
-    , data_ingest    
+    , COALESCE(NULLIF(INITCAP(TRIM(CAST(address:provinceIneCode AS VARCHAR))), ''),'Unknown') AS province_ine_code  
     FROM base    
 ),
 silver_province AS (
     SELECT
     MD5(province_name || '|' || province_ine_code) AS province_id
-    , data_ingest
+    , province_name
+    , province_ine_code
     FROM clean
 )
 

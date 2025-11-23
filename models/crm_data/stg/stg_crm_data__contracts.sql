@@ -1,21 +1,26 @@
+{{
+    config(
+        materialized='table'
+    )
+}}
 WITH stg_contracts AS (
     SELECT * 
     FROM {{ ref('base_crm_data__contracts') }}
+
     ),
 silver_contracts AS (
     SELECT
-        id AS contract_id
-        , MD5(contractedPower) AS contractedPowerID
+        contract_id
+        , MD5(contractedPower) AS contracted_power_id
+        , MD5(economicActivity) AS economic_activity_id
+        , MD5(energy_provider_name) AS energy_provider_id
+        , MD5(responsibleEnergyContract) AS contract_owner_id
+        , MD5(tariff) AS tariff_id
         , supplyPoint
-        , MD5(economicActivity) AS economicActivityID
         , end_date
-        , MD5(energyProviderName) AS energyProviderID
         , init_date
-        , MD5(responsibleEnergyContract) AS responsibleEnergyContractID
         , contract_status
-        , tariff
         , tensionLevelMeasurePoint
-        , data_ingest
     FROM stg_contracts
     )
 SELECT * FROM silver_contracts

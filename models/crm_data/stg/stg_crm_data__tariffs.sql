@@ -8,10 +8,10 @@ WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__contracts') }}
     ),
-silver_energyprov AS (
+silver_tariffs AS (
     SELECT DISTINCT
-        MD5(energy_provider_name) AS energy_provider_id
-        energy_provider_name
+        MD5(tariff) AS tariff_id
+        , tariff
     FROM base
     )
-SELECT * FROM silver_energyprov
+SELECT * FROM silver_tariffs

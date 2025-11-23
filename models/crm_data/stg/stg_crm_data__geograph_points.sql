@@ -1,6 +1,21 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key = 'supplyPoint',
+        on_schema_change='fail'
+    )
+}}
+
 WITH src_punto_dc AS (
     SELECT * 
     FROM {{ source('crm_data', 'punto_dc') }}
+
+    {% if is_incremental() %}
+
+    where data_ingest > (select max(data_ingest) from {{ this }})
+
+    {% endif %}
+    
     ),
 silver_puntodc AS (
     SELECT
