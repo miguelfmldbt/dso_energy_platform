@@ -28,7 +28,6 @@ models:
         data_tests:
           - not_null
           - relationships:
-              arguments:
                 to: ref('stg_crm_data__meters')
                 field: meter_id
         constraints:

@@ -31,7 +31,7 @@ models:
           - not_null   
 
       - name: economicActivity
-        data_type: varchar
+        data_type: variant
         description: "Contract economic activity code."
         data_tests:
           - not_null
@@ -49,7 +49,7 @@ models:
           - not_null
 
       - name: responsibleEnergyContract
-        data_type: varchar
+        data_type: variant
         description: "Identifier of the responsible party for the contract."
         data_tests:
           - not_null
@@ -113,7 +113,7 @@ models:
           - not_null
 
       - name: conf_type
-        data_type: varchar
+        data_type: variant
         description: Configuration type from CRM.
         data_tests:
           - not_null
@@ -131,7 +131,7 @@ models:
           - not_null
 
       - name: cups
-        data_type: varchar
+        data_type: array
         description: >
           List of supply points associated with this self-consumption.
         data_tests:

@@ -1,8 +1,8 @@
-{{
-    config(
-        materialized='table'
-    )
+{{ config(
+     materialized='table'
+    ) 
 }}
+
 WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__contracts') }}

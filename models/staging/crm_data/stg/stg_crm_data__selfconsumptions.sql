@@ -1,12 +1,12 @@
-{{
-    config(
-        materialized='table'
-    )
+{{ config(
+     materialized='table'
+    ) 
 }}
 
 WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__selfconsumptions') }}
+
     ),
 silver_selfconsumptions AS (
     SELECT
@@ -24,7 +24,7 @@ silver_selfconsumptions AS (
         , t.end_date
         , t.excedents
         , t.generation_pot
-        , t.selfconsumption_owner    
+        , t.selfconsumption_owner  
     FROM base AS t
     LEFT JOIN LATERAL FLATTEN(
         input => t.cups,
