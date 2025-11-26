@@ -1,38 +1,32 @@
-{{
-    config(
-        materialized='table'
-    )
-}}
 WITH base AS (
     SELECT *
     FROM {{ ref('base_crm_data__supply_points') }}
 ),
-clean AS (
-    SELECT DISTINCT
-    address
-    , COALESCE(NULLIF(INITCAP(TRIM(CAST(address:street AS VARCHAR))), ''), 'Unknown') AS street_name
-    , COALESCE(NULLIF(INITCAP(TRIM(CAST(address:town AS VARCHAR))), ''), 'Unknown') AS town_name
-    , COALESCE(NULLIF(INITCAP(TRIM(CAST(address:postalCode AS VARCHAR))), ''), 'Unknown') AS postal_code
-    , CAST(address:typeAddress AS VARCHAR) AS type_address
-    , MD5(CAST(address:phoneOne AS VARCHAR)) AS phone
-    , CAST(address:number AS VARCHAR) AS number
-    , CAST(address:portal AS VARCHAR) AS portal
-    , CAST(address:floor AS VARCHAR) AS floor
-    , CAST(address:letter AS VARCHAR) AS letter
-    FROM base
-),
 silver_address AS (
-    SELECT
-        MD5(address) AS address_id
-        , MD5(UPPER(street_name || '|' || town_name || '|' || postal_code)) AS street_id
-        , number
-        , portal
-        , floor
-        , letter
-        , postal_code
-        , type_address
-        , phone
-    FROM clean
+    SELECT DISTINCT
+        MD5(
+            street_name || '|' ||
+            postal_code || '|' ||
+            town_name || '|' ||
+            municipality_name || '|' ||
+            municipality_ine_code || '|' ||
+            province_name || '|' ||
+            province_ine_code || '|' ||
+            number || '|' ||
+            portal || '|' ||
+            floor || '|' ||
+            letter || '|' ||
+            type_address || '|' ||
+            phone
+            ) AS address_id,
+        MD5(street_name || '|' || postal_code || '|' || town_name || '|' || municipality_name || '|' || municipality_ine_code || '|' || province_name || '|' || province_ine_code) AS street_id,
+        number,
+        portal,
+        floor,
+        letter,
+        type_address,
+        phone
+    FROM base
 )
 
 SELECT * FROM silver_address

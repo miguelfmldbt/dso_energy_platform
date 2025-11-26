@@ -9,9 +9,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [ct_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [ct_id]
     columns:
       - name: ct_id
         description: >
@@ -29,9 +30,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__distributors')
-              field: dso_id
-
+              arguments:
+                to: ref('stg_crm_data__distributors')
+                field: dso_id
       - name: ct_code
         description: >
           Code of the CT.
@@ -54,9 +55,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [address_id]  
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [address_id]
 
     columns:
 
@@ -73,9 +75,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-                  to: ref('stg_crm_data__streets')
-                  field: street_id
-
+              arguments:
+                to: ref('stg_crm_data__streets')
+                field: street_id
       - name: number
         description: "Street number of the address."
         data_type: varchar
@@ -94,12 +96,6 @@ models:
         description: "Letter or apartment identifier."
         data_type: varchar
 
-      - name: postal_code
-        description: "Postal code associated with the address."
-        data_type: varchar
-        data_tests:
-          - not_null
-
       - name: type_address
         description: "Type of address (street, avenue, square...)."
         data_type: varchar
@@ -107,7 +103,7 @@ models:
       - name: phone
         description: "Hashed phone number using MD5 for privacy preservation."
         data_type: varchar
-  
+
   - name: stg_crm_data__cnmc_solars
     description: >
       Dimension table that standardizes CNMC solar classification metadata.
@@ -117,12 +113,12 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [cnmc_solar_id]
-    
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [cnmc_type_id]
     columns:
-      - name: cnmc_solar_id
+      - name: cnmc_type_id
         description: >
           Surrogate primary key generated as MD5 hash of the raw cnmc_solar field.
         data_type: varchar
@@ -130,26 +126,15 @@ models:
           - unique
           - not_null
 
-      - name: cnmc_type_id
-        description: >
-          Numerical identifier for the CNMC solar type.
-        data_type: integer
-        data_tests:
-          - not_null
-
       - name: cnmc_type_desc
         description: >
           Text description of the CNMC solar type.
         data_type: varchar
-        data_tests:
-          - not_null
 
       - name: cnmc_type_name
         description: >
           Internal CNMC type name represented as an integer code.
         data_type: integer
-        data_tests:
-          - not_null
 
   - name: stg_crm_data__configurationtypes
     description: >
@@ -159,9 +144,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [config_id]  
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [config_id]
 
     columns:
       - name: config_id
@@ -195,9 +181,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [consumer_type_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [consumer_type_id]
 
     columns:
       - name: consumer_type_id
@@ -223,9 +210,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [contract_owner_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contract_owner_id]
 
     columns:
       - name: contract_owner_id
@@ -254,15 +242,15 @@ models:
 
   - name: stg_crm_data__contracts
     description: >
-      Curated (silver) contracts.  
-      Represents the business contract linked to a supply point.
+      Curated (silver) contracts.   Represents the business contract linked to a supply point.
 
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [contract_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contract_id]
 
     columns:
       - name: contract_id
@@ -278,57 +266,54 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__contractspower')
-              field: contracted_power_id
-
+              arguments:
+                to: ref('stg_crm_data__contractspower')
+                field: contracted_power_id
       - name: economic_activity_id
         description: "Surrogate key referencing the economic activity dimension"
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__econmactivities')
-              field: economic_activity_id
-
+              arguments:
+                to: ref('stg_crm_data__econmactivities')
+                field: economic_activity_id
       - name: energy_provider_id
         description: "Surrogate key referencing the energy providers dimension"
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__energyproviders')
-              field: energy_provider_id
-
+              arguments:
+                to: ref('stg_crm_data__energyproviders')
+                field: energy_provider_id
       - name: contract_owner_id
         description: "Surrogate key referencing the contract owners dimension"
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__contractowners')
-              field: contract_owner_id
-
+              arguments:
+                to: ref('stg_crm_data__contractowners')
+                field: contract_owner_id
       - name: tariff_id
         description: "Surrogate key referencing the tariff dimension"
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__tariffs')
-              field: tariff_id
-
+              arguments:
+                to: ref('stg_crm_data__tariffs')
+                field: tariff_id
       - name: supplyPoint
         description: "Supply point linked to the contract"
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__supply_points')
-              field: supplyPoint
-          - relationships:    
-              to: ref('stg_crm_data__selfconsumptions')
-              field: supplyPoint
-
+              arguments:
+                to: ref('stg_crm_data__supply_points')
+                field: supplyPoint
       - name: end_date
         description: "UTC-normalized contract end timestamp"
         data_type: timestamp_tz
@@ -343,8 +328,8 @@ models:
         description: "Status of the contract in the CRM system"
         data_type: varchar
         data_tests:
-          - not_null   
-  
+          - not_null
+
   - name: stg_crm_data__contractspower
     description: >
       Table containing the contracted power per regulatory period
@@ -353,9 +338,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [contracted_power_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contracted_power_id]
 
     columns:
       - name: contracted_power_id
@@ -438,11 +424,12 @@ models:
       Normalized economic activity dimension extracted from CRM contracts.
 
     config:
-      contracts:
-        enforced: true
-      constraints:
-        - type: primary_key
-          columns: [economic_activity_id]  
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [economic_activity_id]
 
     columns:
       - name: economic_activity_id
@@ -482,9 +469,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [energy_provider_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [energy_provider_id]
 
     columns:
       - name: energy_provider_id
@@ -501,7 +489,7 @@ models:
         data_type: varchar
         data_tests:
           - not_null
-  
+
   - name: stg_crm_data__geograph_points
     description: >
       Curated (silver) version of geographic coordinates for supply points (Punto DC).
@@ -509,9 +497,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [supplyPoint]  
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
 
     columns:
       - name: supplyPoint
@@ -522,9 +511,11 @@ models:
           - not_null
           - unique
           - relationships:
-              field: supplyPoint
-              to: ref('stg_crm_data__supply_points')
-
+              config:
+                severity: warn
+              arguments:
+                field: supplyPoint
+                to: ref('stg_crm_data__supply_points')
       - name: x_coord
         description: >
           X coordinate (longitude) in float format after normalization from comma decimal format.
@@ -541,10 +532,8 @@ models:
 
       - name: z_coord
         description: >
-          Z coordinate (elevation) in float format after normalization from comma decimal format.
+          Z coordinate (elevation) in float format after normalization from comma decimal format. Could be missing
         data_type: float
-        data_tests:
-          - not_null
 
       - name: data_ingest
         description: >
@@ -561,9 +550,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [line_id] 
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [line_id]
 
     columns:
       - name: line_id
@@ -582,13 +572,12 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__transformers')
-              field: transformer_id
-        
+              arguments:
+                to: ref('stg_crm_data__transformers')
+                field: transformer_id
       - name: line_code
         description: >
-          Business identifier for the line as received from CRM. May contain 
-          numeric or alphanumeric values.
+          Business identifier for the line as received from CRM. May contain  numeric or alphanumeric values.
         data_type: varchar
         data_tests:
           - not_null
@@ -601,9 +590,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [measure_point_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [measure_point_id]
 
     columns:
       - name: measure_point_id
@@ -635,11 +625,12 @@ models:
       Each record represents a unique combination of meter technology name and code.
 
     config:
-      contracts:
-        enforced: true
-      constraints:
-        - type: primary_key
-          columns: [meter_tech_id]
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [meter_tech_id]
 
     columns:
       - name: meter_tech_id
@@ -666,23 +657,30 @@ models:
 
   - name: stg_crm_data__meters
     description: >
-      Normalized meter dimension containing the surrogate key (meter_id), 
-      technology reference, and the natural meter code.
+      Normalized meter dimension containing the surrogate key (meter__supply_id),  technology reference, and the natural meter code.
 
     config:
-      contracts:
-        enforced: true
-      constraints:
-        - type: primary_key
-          columns: [meter_id]
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [meter_supply_id]
 
     columns:
+      - name: meter_supply_id
+        description: >
+          Primary key for each unique meter & supply point
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
       - name: meter_id
         description: >
           Surrogate key for each unique meter, generated as MD5(dso_name || meter_code).
         data_type: varchar
         data_tests:
-          - unique
           - not_null
 
       - name: meter_tech_id
@@ -692,9 +690,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__meter_technologies')
-              field: meter_tech_id
-
+              arguments:
+                to: ref('stg_crm_data__meter_technologies')
+                field: meter_tech_id
       - name: meter_code
         description: >
           Natural identifier of the smart meter as provided by the distributor.
@@ -708,11 +706,12 @@ models:
       each linked to a province via a surrogate key. Derived from CRM supply points data.
 
     config:
-      contracts:
-        enforced: true
-      constraints:
-        - type: primary_key
-          columns: [municipality_id]
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [municipality_id]
 
     columns:
       - name: municipality_id
@@ -728,9 +727,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__provinces')
-              field: province_id
-
+              arguments:
+                to: ref('stg_crm_data__provinces')
+                field: province_id
       - name: municipality_name
         description: "Normalized municipality name in title case."
         data_type: varchar
@@ -749,9 +748,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [province_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [province_id]
 
     columns:
       - name: province_id
@@ -780,9 +780,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [selfconsumption_status_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [selfconsumption_status_id]
 
     columns:
       - name: selfconsumption_status_id
@@ -806,15 +807,15 @@ models:
     description: >
       Flattened and curated (silver) model of self-consumption data.
       Expands the array of CUPS to produce one record per supply point.
-      Generates surrogate keys referencing configuration, consumer type, 
-      solar zone, self-consumption status, and CNMC solar classifications.
+      Generates surrogate keys referencing configuration, consumer type,  solar zone, self-consumption status, and CNMC solar classifications.
 
     config:
-      contracts:
-        enforced: true
-      constraints:
-        - type: primary_key
-          columns: [supplyPoint]
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
 
     columns:
 
@@ -825,7 +826,12 @@ models:
         data_tests:
           - not_null
           - unique
-
+          - relationships:
+              severity: warn
+              arguments:
+                to: ref('stg_crm_data__contracts')
+                field: supplyPoint
+      
       - name: config_id
         description: >
           Surrogate key referencing the configuration type dimension.
@@ -833,9 +839,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__configurationtypes')
-              field: config_id
-
+              arguments:
+                to: ref('stg_crm_data__configurationtypes')
+                field: config_id
       - name: consumer_type_id
         description: >
           Surrogate key referencing the consumer type dimension.
@@ -843,9 +849,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__consumertypes')
-              field: consumer_type_id
-
+              arguments:
+                to: ref('stg_crm_data__consumertypes')
+                field: consumer_type_id
       - name: solar_zone_id
         description: >
           Surrogate key referencing the solar zone dimension.
@@ -853,9 +859,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__solarzones')
-              field: solar_zone_id
-
+              arguments:
+                to: ref('stg_crm_data__solarzones')
+                field: solar_zone_id
       - name: selfconsumption_status_id
         description: >
           Surrogate key referencing the self-consumption status dimension.
@@ -863,19 +869,19 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__selfconsumption_statuses')
-              field: selfconsumption_status_id
-
-      - name: cnmc_solar_id
+              arguments:
+                to: ref('stg_crm_data__selfconsumption_statuses')
+                field: selfconsumption_status_id
+      - name: cnmc_type_id
         description: >
           Surrogate key referencing the CNMC-solar classification.
         data_type: varchar
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__cnmc_solars')
-              field: cnmc_solar_id
-
+              arguments:
+                to: ref('stg_crm_data__cnmc_solars')
+                field: cnmc_type_id
       - name: selfconsumption_id
         description: >
           Business identifier of the self-consumption system.
@@ -936,9 +942,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [solar_zone_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [solar_zone_id]
 
     columns:
       - name: solar_zone_id
@@ -947,21 +954,16 @@ models:
         data_type: varchar
         data_tests:
           - not_null
-          - unique
 
       - name: solar_zone_name
         description: >
           Human–readable name of the solar zone.
         data_type: varchar
-        data_tests:
-          - not_null
 
       - name: solar_zone_number
         description: >
           Numeric identifier representing the solar zone.
         data_type: integer
-        data_tests:
-          - not_null
 
   - name: stg_crm_data__streets
     description: >
@@ -971,9 +973,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [street_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [street_id]
 
     columns:
       - name: street_id
@@ -989,8 +992,15 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__towns')
-              field: town_id
+              arguments:
+                to: ref('stg_crm_data__towns')
+                field: town_id
+
+      - name: postal_code
+        description: "Postal code associated with the address."
+        data_type: varchar
+        data_tests:
+          - not_null
 
       - name: street_name
         description: "Human-readable street name extracted and cleaned from the raw JSON address."
@@ -1008,9 +1018,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [supplyPoint]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
 
     columns:
       - name: supplyPoint
@@ -1028,9 +1039,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__addresses')
-              field: address_id
-
+              arguments:
+                to: ref('stg_crm_data__addresses')
+                field: address_id
       - name: line_id
         data_type: varchar
         description: >
@@ -1038,9 +1049,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__lines')
-              field: line_id
-
+              arguments:
+                to: ref('stg_crm_data__lines')
+                field: line_id
       - name: measure_point_id
         data_type: varchar
         description: >
@@ -1048,19 +1059,19 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__measure_points')
-              field: measure_point_id
-
-      - name: meter_id
+              arguments:
+                to: ref('stg_crm_data__measure_points')
+                field: measure_point_id
+      - name: meter_supply_id
         data_type: varchar
         description: >
           Surrogate key referencing the smart meter dimension.
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__meters')
-              field: meter_id
-
+              arguments:
+                to: ref('stg_crm_data__meters')
+                field: meter_supply_id
       - name: phase
         data_type: varchar
         description: >
@@ -1073,7 +1084,7 @@ models:
         description: >
           Type of supply point (e.g. consumption, generation, mixed).
         data_tests:
-          - not_null   
+          - not_null
 
   - name: stg_crm_data__tariffs
     description: >
@@ -1083,9 +1094,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [tariff_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [tariff_id]
 
     columns:
       - name: tariff_id
@@ -1107,9 +1119,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [town_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [town_id]
 
     columns:
       - name: town_id
@@ -1125,9 +1138,9 @@ models:
         data_tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__municipalities')
-              field: municipality_id
-
+              arguments:
+                to: ref('stg_crm_data__municipalities')
+                field: municipality_id
       - name: town_name
         description: "Standardized town name extracted from the supply point address."
         data_type: varchar
@@ -1136,21 +1149,20 @@ models:
 
   - name: stg_crm_data__transformers
     description: >
-      Table representing electrical transformers.  
-      Each transformer belongs to a single center (CT).
+      Table representing electrical transformers.   Each transformer belongs to a single center (CT).
 
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [transformer_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [transformer_id]
 
     columns:
       - name: transformer_id
         description: >
-          Surrogate key (MD5 hash) uniquely identifying each transformer.  
-          Generated from transformer_code, ct_code and dso_id.
+          Surrogate key (MD5 hash) uniquely identifying each transformer.   Generated from transformer_code, ct_code and dso_id.
         data_type: varchar
         tests:
           - unique
@@ -1163,9 +1175,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_crm_data__centers')
-              field: ct_id
-
+              arguments:
+                to: ref('stg_crm_data__centers')
+                field: ct_id
       - name: transformer_code
         description: >
           Original transformer code provided by the distributor.

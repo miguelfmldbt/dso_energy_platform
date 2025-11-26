@@ -3,23 +3,22 @@ version: 2
 models:
   - name: s09
     description: >
-      Curated (silver) version of Power Quality (PQ) event data. 
-      Includes type casting, standardized field names, and UTC timestamps.
+      Curated (silver) version of Power Quality (PQ) event data.  Includes type casting, standardized field names, and UTC timestamps.
     config:
-      contracts:
-        enforced: true 
+      meta:
+        contracts:
+          enforced: true
     constraints:
       - type: primary_key
-        columns: [quality_event_id]     
-    
+        columns: [quality_event_id]
     columns:
       - name: quality_event_id
         data_type: varchar
         description: >
           UUID of each PQ event
         data_tests:
-              - unique
-              - not_null
+          - unique
+          - not_null
 
       - name: meter_id
         data_type: varchar
@@ -28,6 +27,7 @@ models:
         data_tests:
           - not_null
           - relationships:
+              arguments:
                 to: ref('stg_crm_data__meters')
                 field: meter_id
         constraints:
@@ -42,12 +42,19 @@ models:
         data_tests:
           - not_null
 
+      - name: meter_code
+        data_type: varchar
+        description: >
+          Identifier of the meter that register meter events
+        data_tests:
+          - not_null    
+
       - name: quality_event_timestamp
         data_type: timestamp_tz
         description: >
           Timestamp when the PQ event finished, normalized to UTC.
         data_tests:
-          - not_null 
+          - not_null
 
       - name: quality_event_group
         data_type: integer
@@ -64,7 +71,7 @@ models:
         description: >
           Subcategory of the PQ event.
         data_tests:
-          - not_null 
+          - not_null
         constraints:
           - type: check
             expression: quality_event_group >= 0
@@ -81,4 +88,4 @@ models:
         description: >
           Timestamp when the raw S09 data was ingested into bronze (UTC).
         data_tests:
-          - not_null           
+          - not_null

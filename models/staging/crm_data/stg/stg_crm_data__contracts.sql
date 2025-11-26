@@ -1,11 +1,21 @@
-{{ config(
-     materialized='table'
-    ) 
+{{
+    config(
+        materialized='incremental',
+        unique_key = 'contract_id',
+        on_schema_change='fail'
+    )
 }}
 
 WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__contracts') }}
+
+    {% if is_incremental() %}
+        WHERE contract_id NOT IN (
+            SELECT DISTINCT contract_id
+            FROM {{ this }}
+        )
+    {% endif %}
 
     ),
 silver_contracts AS (

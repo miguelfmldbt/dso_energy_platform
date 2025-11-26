@@ -10,9 +10,9 @@ WITH base AS (
     ),
 silver_configtype AS (
     SELECT DISTINCT
-        MD5(conf_type) AS config_id
-        , CAST(conf_type:conf_type AS VARCHAR) AS configuration_type
-        , CAST(conf_type:conf_type_desciption AS VARCHAR) AS conf_type_desc
+        MD5(configuration_type || '|' || conf_type_desc) AS config_id
+        , configuration_type
+        , conf_type_desc
     FROM base
     )
 SELECT * FROM silver_configtype

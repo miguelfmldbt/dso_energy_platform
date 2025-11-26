@@ -20,9 +20,9 @@ WITH src_punto_dc AS (
 silver_puntodc AS (
     SELECT
         CUPS AS supplyPoint
-        , CAST(REPLACE("Coordenada X", ',', '.') AS FLOAT) AS x_coord
-        , CAST(REPLACE("Coordenada Y", ',', '.') AS FLOAT) AS y_coord
-        , CAST(REPLACE("Coordenada Z", ',', '.') AS FLOAT) AS z_coord
+        , CAST(NULLIF(REPLACE("Coordenada X", ',', '.'), '') AS FLOAT) AS x_coord
+        , CAST(NULLIF(REPLACE("Coordenada Y", ',', '.'), '') AS FLOAT) AS y_coord
+        , CAST(NULLIF(REPLACE("Coordenada Z", ',', '.'), '') AS FLOAT) AS z_coord
         , CONVERT_TIMEZONE('UTC', data_ingest) AS data_ingest
     FROM src_punto_dc
     )

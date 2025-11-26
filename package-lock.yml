@@ -5,4 +5,7 @@ packages:
   - name: codegen
     package: dbt-labs/codegen
     version: 0.13.1
-sha1_hash: 622fcbe91f7df2d9329fdcf3ed5cd70eca0271b0
+  - name: dbt_date
+    package: godatadriven/dbt_date
+    version: 0.17.0
+sha1_hash: c94f1cd11eebd0874868e1a7ba09503a88a2de91

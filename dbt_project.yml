@@ -47,6 +47,16 @@ models:
       crm_data:
         +schema: crm_data
 
+    marts:
+      +materialized: table
+      +database: "PROJECT_DEV_GOLD_DB"
+      core:
+        +schema: core
+      energy_consumption:
+        +schema: energy_consumption
+      PQ_events:
+        +schema: pq_events 
+
 snapshots:
   +transient: false
   +target_database: "PROJECT_DEV_SILVER_DB"

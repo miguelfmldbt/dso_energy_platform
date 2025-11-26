@@ -1,21 +1,31 @@
-{{ config(
-     materialized='table'
-    ) 
+{{
+    config(
+        materialized='incremental',
+        unique_key = 'selfconsumption_id',
+        on_schema_change='fail'
+    )
 }}
 
 WITH base AS (
     SELECT * 
     FROM {{ ref('base_crm_data__selfconsumptions') }}
 
+    {% if is_incremental() %}
+        WHERE selfconsumption_id NOT IN (
+            SELECT DISTINCT selfconsumption_id 
+            FROM {{ this }}
+        )
+    {% endif %}
+
     ),
 silver_selfconsumptions AS (
     SELECT
-        REPLACE(TO_VARCHAR(f.value), '"', '') AS supplyPoint
-        , MD5(t.conf_type) config_id
-        , MD5(t.consumer_type) AS consumer_type_id
-        , MD5(t.solar_zone) AS solar_zone_id
-        , MD5(t.selfconsumption_status) AS selfconsumption_status_id
-        , MD5(t.cnmc_solar) AS cnmc_solar_id
+        COALESCE(NULLIF(REPLACE(TO_VARCHAR(f.value), '"', ''), ''), 'Unknown') AS supplyPoint
+        , MD5(t.configuration_type || '|' || t.conf_type_desc) AS config_id
+        , consumer_type_id
+        , solar_zone_id
+        , selfconsumption_status_id
+        , cnmc_type_id
         , t.selfconsumption_id
         , t.cau_ID
         , t.compensation

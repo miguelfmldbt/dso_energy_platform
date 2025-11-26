@@ -1,20 +1,7 @@
-{{
-    config(
-        materialized='incremental',
-        unique_key = 'contract_id',
-        on_schema_change='fail'
-    )
-}}
 
 WITH src_contracts AS (
     SELECT * 
     FROM {{ source('crm_data', 'contracts') }}
-
-    {% if is_incremental() %}
-
-    where data_ingest > (select max(data_ingest) from {{ this }})
-
-    {% endif %}
     ),
 renamed_casted AS (
     SELECT

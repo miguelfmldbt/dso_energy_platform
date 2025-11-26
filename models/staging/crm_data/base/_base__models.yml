@@ -7,9 +7,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [contract_id]
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contract_id]
 
     columns:
 
@@ -28,7 +29,7 @@ models:
         data_type: varchar
         description: "CUPS identifier of the supply point."
         data_tests:
-          - not_null   
+          - not_null
 
       - name: economicActivity
         data_type: variant
@@ -86,9 +87,10 @@ models:
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [selfconsumption_id]  
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [selfconsumption_id]
 
     columns:
 
@@ -112,9 +114,15 @@ models:
         data_tests:
           - not_null
 
-      - name: conf_type
-        data_type: variant
+      - name: configuration_type
+        data_type: varchar
         description: Configuration type from CRM.
+        data_tests:
+          - not_null
+        
+      - name: conf_type_desc
+        data_type: varchar
+        description: Configuration type description from CRM.
         data_tests:
           - not_null
 
@@ -124,11 +132,17 @@ models:
         data_tests:
           - not_null
 
-      - name: consumer_type
-        data_type: variant
-        description: Raw consumer type field.
+      - name: consumer_type_id
+        data_type: varchar
+        description: Surrogate key for selfconsumption_consumer
         data_tests:
           - not_null
+
+      - name: consumer_type_desc
+        data_type: varchar
+        description: Selfconsumption_consumer desciption
+        data_tests:
+          - not_null    
 
       - name: cups
         data_type: array
@@ -161,29 +175,65 @@ models:
         data_tests:
           - not_null
 
-      - name: solar_zone
-        data_type: variant
-        description: Solar zone assigned by distributor.
+      - name: solar_zone_id
+        description: >
+          Surrogate key generated from the raw solar_zone structure.
+        data_type: varchar
         data_tests:
           - not_null
 
-      - name: selfconsumption_status
-        data_type: variant
-        description: Raw status field from CRM.
+      - name: solar_zone_name
+        description: >
+          Human–readable name of the solar zone.
+        data_type: varchar
         data_tests:
           - not_null
 
-      - name: cnmc_solar
-        data_type: variant
-        description: CNMC solar unit type.
+      - name: solar_zone_number
+        description: >
+          Numeric identifier representing the solar zone.
+        data_type: integer
         data_tests:
-          - not_null  
+          - not_null
+
+      - name: selfconsumption_status_id
+        data_type: varchar
+        description: Hashed Status field natural id from CRM.
+        data_tests:
+          - not_null
+
+      - name: status_name
+        data_type: varchar
+        description: Status field name from CRM.
+        data_tests:
+          - not_null    
+
+      - name: cnmc_type_id
+        description: >
+          Identifier for the CNMC solar type.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: cnmc_type_desc
+        description: >
+          Text description of the CNMC solar type.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: cnmc_type_name
+        description: >
+          Internal CNMC type name represented as an integer code.
+        data_type: integer
+        data_tests:
+          - not_null
 
       - name: init_date
         data_type: timestamp_tz
         description: UTC initialization date.
         data_tests:
-          - not_null  
+          - not_null
 
       - name: data_ingest
         data_type: timestamp_tz
@@ -196,13 +246,14 @@ models:
       Base incremental staging model for CRM supply points.
       Cleans raw CRM data: trims fields, handles Unknown values,
       standardizes codes, casts data types, and converts timestamps to UTC.
-    
+
     config:
       contract:
         enforced: true
-      constraints:
-        - type: primary_key
-          columns: [supplyPoint]  
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
 
     columns:
       - name: supplyPoint
@@ -212,9 +263,81 @@ models:
           - not_null
           - unique
 
-      - name: address
-        description: Raw JSON address object received from CRM
-        data_type: variant
+      - name: street_name
+        description: Information the supply point streets
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: town_name
+        description: Information the supply point towns
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: postal_code
+        description: Information the supply point zipcodes
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: type_address
+        description: Information the supply point different address types
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: phone
+        description: Information the supply point phone
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: number
+        description: Information the supply point number
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: portal
+        description: Information the supply point portal
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: floor
+        description: Information the supply point floor
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: letter
+        description: Information the supply point letter
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: province_name
+        description: Information the supply point province
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: province_ine_code
+        description: Information the supply point province INE (Spain) code
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: municipality_name
+        description: Information the supply point municipality
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: municipality_ine_code
+        description: Information the supply point municipality INE (Spain) code
+        data_type: varchar
         data_tests:
           - not_null
 
@@ -292,4 +415,4 @@ models:
         description: Timestamp when the data was ingested into Bronze (converted to UTC)
         data_type: timestamp_tz
         data_tests:
-          - not_null            
+          - not_null

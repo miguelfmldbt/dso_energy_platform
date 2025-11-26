@@ -14,8 +14,6 @@ WITH src AS (
         WHERE data_ingest > (SELECT max(data_ingest) FROM {{ this }})
     {% endif %}
 ),
-
--- Deduplicación dentro del propio batch
 row_cte AS (
     SELECT
         Cnt,
@@ -34,8 +32,9 @@ row_cte AS (
 silver_s02 AS (
     SELECT
         MD5(Cnt || '|' || LEFT(FH,17) || '|' || dso) AS energy_id,
-        MD5(Cnt || '|' || dso) AS meter_id,
+        MD5(dso || '|' || Cnt) AS meter_id,
         CAST(Cnc AS VARCHAR) AS concentrator,
+        CAST(Cnt AS VARCHAR) AS meter_code,
         CONVERT_TIMEZONE('Europe/Madrid', 'UTC', TO_TIMESTAMP(LEFT(FH,14), 'YYYYMMDDHH24MISS')) AS energy_timestamp,
         CAST(AE AS FLOAT) * CAST(Magn AS INTEGER) AS active_exported_energy_Wh,
         CAST(AI AS FLOAT) * CAST(Magn AS INTEGER) AS active_imported_energy_Wh,

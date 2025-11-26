@@ -3,23 +3,22 @@ version: 2
 models:
   - name: s02
     description: >
-      Curated (silver) version of hourly energetic data data. 
-      Includes type casting, standardized field names, and UTC timestamps.
+      Curated (silver) version of hourly energetic data data.  Includes type casting, standardized field names, and UTC timestamps.
     config:
-      contracts:
-        enforced: true 
+      meta:
+        contracts:
+          enforced: true
     constraints:
       - type: primary_key
-        columns: [energy_id]     
-    
+        columns: [energy_id]
     columns:
       - name: energy_id
         data_type: varchar
         description: >
           UUID of each energy data
         data_tests:
-              - unique
-              - not_null
+          - unique
+          - not_null
 
       - name: meter_id
         data_type: varchar
@@ -28,6 +27,7 @@ models:
         data_tests:
           - not_null
           - relationships:
+              arguments:
                 to: ref('stg_crm_data__meters')
                 field: meter_id
         constraints:
@@ -42,12 +42,19 @@ models:
         data_tests:
           - not_null
 
+      - name: meter_code
+        data_type: varchar
+        description: >
+          Identifier of the meter that register energy
+        data_tests:
+          - not_null    
+
       - name: energy_timestamp
         data_type: timestamp_tz
         description: >
           Timestamp when the energy was registered, normalized to UTC.
         data_tests:
-          - not_null 
+          - not_null
 
       - name: active_exported_energy_Wh
         data_type: float
@@ -87,7 +94,7 @@ models:
           - not_null
         constraints:
           - type: check
-            expression: reactive_energy_q2_VAr >= 0         
+            expression: reactive_energy_q2_VAr >= 0
 
       - name: reactive_energy_q3_VAr
         data_type: float
@@ -114,4 +121,4 @@ models:
         description: >
           Timestamp when the raw S02 data was ingested into bronze (UTC).
         data_tests:
-          - not_null 
+          - not_null

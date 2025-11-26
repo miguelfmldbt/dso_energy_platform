@@ -10,8 +10,8 @@ WITH base AS (
     ),
 silver_selfconsumption_status AS (
     SELECT DISTINCT
-        MD5(selfconsumption_status) AS selfconsumption_status_id
-        , CAST(selfconsumption_status:status_name AS VARCHAR) AS status_name
+        selfconsumption_status_id
+        , status_name
     FROM base
     )
 SELECT * FROM silver_selfconsumption_status
