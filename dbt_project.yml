@@ -48,7 +48,7 @@ models:
         +schema: crm_data
 
     marts:
-      +materialized: table
+      +materialized: view
       +database: "PROJECT_DEV_GOLD_DB"
       core:
         +schema: core

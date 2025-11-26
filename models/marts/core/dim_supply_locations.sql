@@ -1,8 +1,6 @@
-{{
+{{ 
     config(
-        materialized='incremental',
-        unique_key = 'supplyPoint',
-        on_schema_change='fail'
+        materialized='table',
     )
 }}
 
@@ -18,10 +16,6 @@ stg_supplypoints AS (
         supplyPoint,
         meter_supply_id
     FROM {{ ref('stg_crm_data__supply_points') }}
-
-    {% if is_incremental() %}
-    WHERE supplyPoint NOT IN (SELECT supplyPoint FROM {{ this }})
-    {% endif %}
 ),
 
 stg_geograph AS (
@@ -37,13 +31,8 @@ stg_geograph AS (
 
 dim_supply_locations AS (
     SELECT
-        MD5(
-            stg_meters.meter_supply_id || '|' ||
-            stg_meters.meter_id || '|' ||
-            stg_geograph.x_coord || '|' ||
-            stg_geograph.y_coord || '|' ||
-            stg_geograph.z_coord
-        ) AS dim_supply_locations_id,
+        MD5(stg_supplypoints.supplyPoint) AS dim_supply_locations_id,
+        stg_supplypoints.supplyPoint,
         stg_meters.meter_id,
         stg_geograph.x_coord,
         stg_geograph.y_coord,

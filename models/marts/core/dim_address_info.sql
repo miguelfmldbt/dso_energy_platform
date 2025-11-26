@@ -57,14 +57,7 @@ stg_provinces AS (
 
 dim_addresses AS (
     SELECT
-        MD5(
-            stg_meters.meter_supply_id || '|' ||
-            stg_addresses.street_id || '|' ||
-            stg_streets.town_id || '|' ||
-            stg_towns.town_name || '|' ||
-            stg_municipalities.municipality_name || '|' ||
-            stg_provinces.province_name
-        ) AS dim_addresses_id,
+        MD5(stg_meters.meter_supply_id || '|' || stg_addresses.street_id || '|' || stg_streets.town_id || '|' || stg_municipalities.municipality_id || '|' || stg_provinces.province_id) AS dim_addresses_id,
         stg_meters.meter_id,
         stg_towns.town_name,
         stg_municipalities.municipality_name,

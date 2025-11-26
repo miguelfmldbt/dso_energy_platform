@@ -78,14 +78,7 @@ supply_points_cte AS (
 ),
 dim_contracts_selfconsumption AS (
     SELECT
-        MD5(
-            contracts_cte.supplyPoint|| '|' ||
-            supply_points_cte.meter_id || '|' ||
-            contracts_cte.tariff || '|' ||
-            contracts_cte.energy_provider_name || '|' ||
-            consumer_type_desc || '|' ||
-            CAST(generation_pot AS VARCHAR)
-        ) AS dim_contracts_selfconsumption_id,
+        MD5(contracts_cte.supplyPoint) AS dim_contracts_selfconsumption_id,
         contracts_cte.supplyPoint AS supplyPoint,
         supply_points_cte.meter_id AS meter_id,
         contracts_cte.tariff AS tariff,

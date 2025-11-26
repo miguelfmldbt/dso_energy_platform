@@ -1,0 +1,295 @@
+version: 2
+
+models:
+  - name: dim_addresses
+    description: >
+      Address dimension that links each meter (meter_id) with its corresponding
+      town, municipality, and province. A unique surrogate key is generated using
+      an MD5 hash derived from multiple address-related fields.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [dim_addresses_id]
+
+    columns:
+      - name: dim_addresses_id
+        data_type: string
+        description: >
+          Surrogate key of the dimension, generated as an MD5 hash using 
+          meter_supply_id, street_id, town_id, town_name, municipality_name,
+          and province_name.
+        tests:
+          - not_null
+          - unique
+
+      - name: meter_id
+        data_type: string
+        description: >
+          Unique identifier of the meter associated with the address.
+
+      - name: town_name
+        data_type: string
+        description: >
+          Name of the town where the meter’s address is located.
+
+      - name: municipality_name
+        data_type: string
+        description: >
+          Name of the municipality associated with the meter’s address.
+
+      - name: province_name
+        data_type: string
+        description: >
+          Name of the province associated with the meter’s address.
+
+  - name: dim_contracts_selfconsumption
+    description: >
+      Dimension that combines contract information, tariff, energy provider,
+      and self-consumption attributes for each supply point. A surrogate key is
+      generated using the hashed value of the supplyPoint, which represents the
+      unique contractual entity. This dimension provides enriched commercial data
+      linked to each meter when available.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [dim_contracts_selfconsumption_id]
+
+    columns:
+      - name: dim_contracts_selfconsumption_id
+        data_type: string
+        description: >
+          Surrogate primary key of the dimension, generated as an MD5 hash
+          from the supplyPoint. Ensures a stable and deterministic identifier
+          for each unique contractual entity.
+        tests:
+          - not_null
+          - unique
+
+      - name: supplyPoint
+        data_type: string
+        description: >
+          Business identifier for the connection point. Used to relate contract
+          information, self-consumption attributes, and meter data.
+        tests:
+          - not_null
+
+      - name: meter_id
+        data_type: string
+        description: >
+          Identifier of the physical electricity meter associated with the supply
+          point. May be null if the supply point has no assigned meter.
+
+      - name: tariff
+        data_type: string
+        description: >
+          Contracted tariff associated with the supply point, providing pricing
+          category information.
+
+      - name: energy_provider_name
+        data_type: string
+        description: >
+          Name of the energy retailer providing the contracted service for the
+          supply point.
+
+      - name: consumer_type_desc
+        data_type: string
+        description: >
+          Type of consumer based on self-consumption classification.
+          Defaults to 'no_selfconsumption' when no self-consumption
+          information exists.
+
+      - name: generation_pot
+        data_type: float
+        description: >
+          Installed generation power (in kW) associated with the self-consumption
+          system. Defaults to 0 when no generation capacity exists.
+
+  - name: dim_date
+    description: >
+      Date dimension generated using the dbt_date package. Contains one record
+      per calendar day between the configured start and end dates. Provides
+      essential date attributes used for time-based analysis and joins with fact
+      tables.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [date_id]
+
+    columns:
+      - name: date_id
+        data_type: string
+        description: >
+          Surrogate key of the date dimension, generated as an MD5 hash of
+          the date string (date_day). Serves as the primary key for this
+          dimension.
+        tests:
+          - not_null
+          - unique
+
+      - name: day_of_week
+        data_type: integer
+        description: >
+          Numerical representation of the day of the week (1–7).
+
+      - name: day_of_week_name
+        data_type: string
+        description: >
+          Name of the day of the week (e.g., Monday, Tuesday).
+
+      - name: day_of_month
+        data_type: integer
+        description: >
+          Calendar day number within the month (1–31).
+
+      - name: week_of_year
+        data_type: integer
+        description: >
+          Week number within the calendar year (1–53).
+
+      - name: month_of_year
+        data_type: integer
+        description: >
+          Numerical representation of the month (1–12).
+
+      - name: month_name
+        data_type: string
+        description: >
+          Name of the month (e.g., January, February).
+
+  - name: dim_electrical
+    description: >
+      Electrical infrastructure dimension that links each meter to its
+      corresponding supply point, line, transformer, transformation center,
+      and distribution system operator (DSO). This dimension provides the full
+      electrical network hierarchy for each meter, enabling detailed network-level
+      analysis and lineage tracing from the meter up to the DSO.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [dim_electrical_id]
+
+    columns:
+      - name: dim_electrical_id
+        data_type: string
+        description: >
+          Surrogate primary key of the dimension, generated as an MD5 hash from
+          meter_supply_id, line_id, transformer_id, ct_id, and dso_id.
+          Ensures a deterministic and unique identifier for each distinct
+          electrical network configuration.
+        tests:
+          - not_null
+          - unique
+
+      - name: meter_id
+        data_type: string
+        description: >
+          Identifier of the physical electricity meter associated with the
+          supply point. Represents the final measurement device in the network.
+
+      - name: line_code
+        data_type: string
+        description: >
+          Unique code identifying the distribution line connected to the supply
+          point. Lines group meters into shared electrical infrastructure segments.
+
+      - name: transformer_code
+        data_type: string
+        description: >
+          Unique code of the transformer feeding the line. Provides the next level
+          in the electrical hierarchy.
+
+      - name: ct_name
+        data_type: string
+        description: >
+          Name of the transformation center (Centro de Transformación, CT)
+          associated with the transformer.
+
+      - name: dso_name
+        data_type: string
+        description: >
+          Name of the Distribution System Operator (DSO) responsible for managing
+          the electrical infrastructure serving the meter.
+
+  - name: dim_supply_locations
+    description: >
+      Dimension containing geospatial and supply-point location information.
+      Each record represents a supply point enriched with meter identifiers
+      and projected geographic coordinates (x, y, z) as well as WGS84 latitude
+      and longitude. A surrogate key is generated from the supplyPoint to ensure
+      stable identification over time.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [dim_supply_locations_id]
+
+    columns:
+      - name: dim_supply_locations_id
+        data_type: string
+        description: >
+          Surrogate primary key of the dimension, generated as an MD5 hash of
+          the supplyPoint. Ensures stable identification of each location even
+          if associated meter devices change.
+        tests:
+          - not_null
+          - unique
+
+      - name: supplyPoint
+        data_type: string
+        description: >
+          Business identifier for the supply point. Represents the physical
+          connection location within the electrical network.
+        tests:
+          - not_null
+
+      - name: meter_id
+        data_type: string
+        description: >
+          Identifier of the meter currently associated with the supply point.
+          May change over time if the meter is replaced.
+
+      - name: x_coord
+        data_type: float
+        description: >
+          Original X coordinate (EPSG:25830) of the supply point extracted
+          from CRM geospatial data.
+
+      - name: y_coord
+        data_type: float
+        description: >
+          Original Y coordinate (EPSG:25830) of the supply point extracted
+          from CRM geospatial data.
+
+      - name: z_coord
+        data_type: float
+        description: >
+          Elevation or Z coordinate associated with the supply point.
+
+      - name: latitude
+        data_type: float
+        description: >
+          Latitude of the supply point transformed into WGS84 (EPSG:4326).
+
+      - name: longitude
+        data_type: float
+        description: >
+          Longitude of the supply point transformed into WGS84 (EPSG:4326).

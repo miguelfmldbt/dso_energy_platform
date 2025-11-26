@@ -40,13 +40,7 @@ stg_distributors AS (
 
 dim_electrical AS (
     SELECT
-        MD5(
-            stg_meters.meter_supply_id || '|' ||
-            stg_lines.line_code || '|' ||
-            stg_transformers.transformer_code || '|' ||
-            stg_centers.ct_name || '|' ||
-            stg_distributors.dso_name
-        ) AS dim_electrical_id,
+        MD5(stg_meters.meter_supply_id || '|' || stg_lines.line_id || '|' || stg_transformers.transformer_id || '|' || stg_centers.ct_id || '|' || stg_distributors.dso_id) AS dim_electrical_id,
         stg_meters.meter_id,
         stg_lines.line_code,
         stg_transformers.transformer_code,

@@ -47,7 +47,7 @@ models:
         description: >
           Identifier of the meter that register energy
         data_tests:
-          - not_null    
+          - not_null
 
       - name: energy_timestamp
         data_type: timestamp_tz
