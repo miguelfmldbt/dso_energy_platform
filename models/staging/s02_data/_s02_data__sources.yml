@@ -1,0 +1,140 @@
+version: 2
+
+sources:
+
+  - name: s02_data
+    description: >
+      Raw data containing hourly energy measurements retrieved from smart meters
+      deployed across the distribution grid. This dataset includes active and reactive
+      energy readings as provided by S02 files.
+    schema: s02_raw_data
+    database: "PROJECT_DEV_BRONZE_DB"
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    tables:
+
+      - name: s02_raw_data
+        description: >
+          Raw S02 smart metering files containing hourly energy readings,
+          meter identifiers, quality flags, and technical metadata.
+        columns:
+
+          - name: Cnc
+            data_type: varchar
+            description: >
+              Concentrator identifier (CNC) associated with the meter providing the data.
+            data_tests:
+              - not_null
+
+          - name: Cnt
+            data_type: varchar
+            description: >
+              Meter identifier where the measurement originates (meter serial number).
+            data_tests:
+              - not_null
+
+          - name: Magn
+            data_type: integer
+            description: >
+              Measurement magnitude code indicating the type of energy or parameter recorded.
+            data_tests:
+              - positive_values
+              - not_null
+
+          - name: ErrCat
+            data_type: varchar
+            description: >
+              Error category assigned to the reading, used for quality assessment.
+
+          - name: ErrorCode
+            data_type: varchar
+            description: >
+              Specific error code describing data quality issues or meter faults.
+
+          - name: Fh
+            data_type: varchar
+            description: >
+              Timestamp of the reading in the S02 raw format (e.g., YYYYMMDDHHMM).
+            data_tests:
+              - not_null
+
+          - name: AE
+            data_type: float
+            description: >
+              Active exported energy (Wh) during the interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: AI
+            data_type: float
+            description: >
+              Active imported energy (Wh) during the interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: R1
+            data_type: float
+            description: >
+              Reactive energy in quadrant Q1 for the measured interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: R2
+            data_type: float
+            description: >
+              Reactive energy in quadrant Q2 for the measured interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: R3
+            data_type: float
+            description: >
+              Reactive energy in quadrant Q3 for the measured interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: R4
+            data_type: float
+            description: >
+              Reactive energy in quadrant Q4 for the measured interval.
+            data_tests:
+              - not_null
+              - positive_values
+
+          - name: file_date
+            data_type: varchar
+            description: >
+              Date indicating when the S02 file was generated or received (in raw string format).
+            data_tests:
+              - not_null
+
+          - name: dso
+            data_type: varchar
+            description: >
+              Identifier of the Distribution System Operator (DSO) generating the file.
+            data_tests:
+              - not_null
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Timestamp of ingestion of the S02 record into the raw storage layer.
+            data_tests:
+              - not_null
+
+        config:
+          loaded_at_field: data_ingest
+
+    config:
+      freshness:
+        warn_after: {count: 365, period: day}
+        error_after: {count: 730, period: day}

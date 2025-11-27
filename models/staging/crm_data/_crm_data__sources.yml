@@ -1,0 +1,551 @@
+version: 2
+
+sources:
+
+  - name: crm_data
+    description: >
+      Raw CRM data containing contract information, self-consumption records,
+      supply point details and other domain entities used for energy modeling.
+    schema: crm_raw_data
+    database: "PROJECT_DEV_BRONZE_DB"
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    tables:
+
+      - name: contracts
+        description: >
+          Contract records including tariff information, supply point details, 
+          contractual dates, status, and related customer metadata.
+        columns:
+          - name: id
+            data_type: variant
+            description: >
+              Internal identifier of the contract record in the source system.
+            data_tests:
+              - unique
+              - not_null
+
+          - name: contractID
+            data_type: variant
+            description: >
+              Unique identifier of the contract assigned by the CRM system.
+            data_tests:
+              - unique
+              - not_null
+
+          - name: contractedPower
+            data_type: variant
+            description: >
+              Contracted electrical power associated with the contract (kW).
+            data_tests:
+              - positive_values
+              - not_null
+
+          - name: cups
+            data_type: varchar
+            description: >
+              CUPS code of the supply point linked to the contract.
+            data_tests:
+              - unique
+              - not_null
+
+          - name: distributorId
+            data_type: varchar
+            description: >
+              Identifier of the energy distributor associated with the contract.
+            data_tests:
+              - not_null
+
+          - name: economicActivity
+            data_type: variant
+            description: >
+              CNAE or economic activity code of the customer associated with the contract.
+            data_tests:
+              - not_null
+
+          - name: endDate
+            data_type: timestamp
+            description: >
+              End date of the contract's validity period, if applicable.
+
+          - name: initDate
+            data_type: timestamp
+            description: >
+              Start date of the contract’s validity period.
+            data_tests:
+              - not_null
+
+          - name: policyCode
+            data_type: varchar
+            description: >
+              Policy or contractual code associated with the agreement.
+            data_tests:
+              - not_null
+
+          - name: responsibleEnergyContract
+            data_type: variant
+            description: >
+              Identifier of the contractual energy responsible within the system.
+            data_tests:
+              - not_null
+
+          - name: servicePointMunicipality
+            data_type: varchar
+            description: >
+              Municipality where the supply point is located.
+            data_tests:
+              - not_null
+
+          - name: servicePointZipCode
+            data_type: varchar
+            description: >
+              Postal code of the supply point.
+            data_tests:
+              - not_null
+
+          - name: status
+            data_type: varchar
+            description: >
+              Current status of the contract (active, suspended, terminated, etc.).
+            data_tests:
+              - not_null
+
+          - name: tariff
+            data_type: varchar
+            description: >
+              Energy tariff associated with the contract.
+            data_tests:
+              - not_null
+
+          - name: technologyEM
+            data_type: varchar
+            description: >
+              Energy technology or modality applied to the contract.
+            data_tests:
+              - not_null
+
+          - name: tensionLevelMeasurePoint
+            data_type: varchar
+            description: >
+              Voltage level at the measurement point.
+            data_tests:
+              - not_null
+
+          - name: tensionLevelServicePoint
+            data_type: varchar
+            description: >
+              Voltage level at the supply point.
+            data_tests:
+              - not_null
+
+          - name: version
+            data_type: integer
+            description: >
+              Record version number in the source system.
+            data_tests:
+              - not_null
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Timestamp indicating when the record was ingested into the raw layer.
+            data_tests:
+              - not_null
+        config:
+          loaded_at_field: data_ingest
+
+      - name: punto_dc
+        description: >
+          Geo-referenced points like supplyPoints used by the DSO to determine location
+        columns:
+          - name: CUPS
+            data_type: varchar
+            description: >
+              CUPS code associated with the geographic coordinate data.
+            data_tests:
+              - not_null
+
+          - name: "Coordenada X"
+            data_type: varchar
+            description: >
+              UTM X coordinate of the supply point location.
+
+          - name: "Coordenada Y"
+            data_type: varchar
+            description: >
+              UTM Y coordinate of the supply point location.
+
+          - name: "Coordenada Z"
+            data_type: varchar
+            description: >
+              Elevation (Z coordinate) of the supply point location.
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Ingestion timestamp for the geographic reference data.
+            data_tests:
+              - not_null
+        config:
+          loaded_at_field: data_ingest
+
+      - name: selfconsumption
+        description: >
+          Information about selfconsumption units asociated to contracts users
+        columns:
+          - name: id
+            data_type: varchar
+            description: >
+              Unique identifier for the self-consumption installation.
+            data_tests:
+              - not_null
+
+          - name: antispill_type
+            data_type: variant
+            description: >
+              Anti-spill configuration used to prevent grid feed-in.
+            data_tests:
+              - not_null
+
+          - name: cau_ID
+            data_type: varchar
+            description: >
+              CAU identifier linked to the self-consumption installation.
+            data_tests:
+              - not_null
+
+          - name: cau_config_ID
+            data_type: varchar
+            description: >
+              Configuration identifier of the CAU for the installation.
+            data_tests:
+              - not_null
+
+          - name: compensation
+            data_type: boolean
+            description: >
+              Indicates whether surplus compensation is enabled.
+            data_tests:
+              - not_null
+
+          - name: conf_type
+            data_type: variant
+            description: >
+              Self-consumption configuration type (individual, collective, etc.).
+            data_tests:
+              - not_null
+
+          - name: conn_type
+            data_type: varchar
+            description: >
+              Electrical connection type of the installation.
+            data_tests:
+              - not_null
+
+          - name: consumer_type
+            data_type: variant
+            description: >
+              Category or type of consumer associated with the installation.
+            data_tests:
+              - not_null
+
+          - name: creation_date
+            data_type: timestamp
+            description: >
+              Record creation date in the source system.
+            data_tests:
+              - not_null
+
+          - name: cups
+            data_type: array
+            description: >
+              List of CUPS codes linked to the self-consumption installation.
+            data_tests:
+              - not_null
+
+          - name: distributor
+            data_type: varchar
+            description: >
+              Name of the energy distributor responsible for the installation.
+            data_tests:
+              - not_null
+
+          - name: distributor_id
+            data_type: varchar
+            description: >
+              Unique identifier of the distributor.
+            data_tests:
+              - not_null
+
+          - name: end_date
+            data_type: timestamp
+            description: >
+              End date of the self-consumption installation, if applicable.
+            data_tests:
+              - not_null
+
+          - name: excedents
+            data_type: boolean
+            description: >
+              Indicates whether the installation injects excess energy into the grid.
+            data_tests:
+              - not_null
+
+          - name: generation_pot
+            data_type: float
+            description: >
+              Installed generation capacity of the self-consumption system (kW).
+
+          - name: group_subgroup
+            data_type: float
+            description: >
+              Technical or administrative grouping code for classification.
+            data_tests:
+              - not_null
+
+          - name: group_subgroup_desc
+            data_type: varchar
+            description: >
+              Description of the group/subgroup classification.
+            data_tests:
+              - not_null
+
+          - name: pointType
+            data_type: varchar
+            description: >
+              Type of supply point to which the self-consumption installation is linked.
+
+          - name: init_date
+            data_type: timestamp
+            description: >
+              Start date of the self-consumption installation.
+            data_tests:
+              - not_null
+
+          - name: name
+            data_type: varchar
+            description: >
+              Name or label assigned to the installation.
+            data_tests:
+              - not_null
+
+          - name: participant_number
+            data_type: integer
+            description: >
+              Number of participants in the installation (for collective setups).
+
+          - name: solar_zone
+            data_type: variant
+            description: >
+              Solar zone categorization used for photovoltaic performance estimation.
+            data_tests:
+              - not_null
+
+          - name: ssaa
+            data_type: boolean
+            description: >
+              Indicates if the installation includes auxiliary services (SSAA).
+            data_tests:
+              - not_null
+
+          - name: status
+            data_type: variant
+            description: >
+              Administrative status of the self-consumption record (active, pending, etc.).
+            data_tests:
+              - not_null
+
+          - name: technology_type
+            data_type: variant
+            description: >
+              Type of photovoltaic or energy technology used in the installation.
+            data_tests:
+              - not_null
+
+          - name: unit_type
+            data_type: variant
+            description: >
+              Technical unit or classification type of the self-consumption installation.
+            data_tests:
+              - not_null
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Timestamp marking the ingestion of the record into the raw layer.
+            data_tests:
+              - not_null
+        config:
+          loaded_at_field: data_ingest
+
+      - name: supply_points
+        description: >
+          Information related to the different supply points. Describes where the supply point is, address, electrical info...
+        columns:
+          - name: id
+            data_type: varchar
+            description: >
+              Unique identifier of the supply point.
+            data_tests:
+              - not_null
+
+          - name: address
+            data_type: variant
+            description: >
+              Structured address information for the supply point.
+            data_tests:
+              - not_null
+
+          - name: concId
+            data_type: varchar
+            description: >
+              Identifier of the concentrator associated with the supply point.
+
+          - name: ctCode
+            data_type: varchar
+            description: >
+              Code of the transformation center linked to the supply point.
+
+          - name: ctName
+            data_type: varchar
+            description: >
+              Name of the transformation center linked to the supply point.
+
+          - name: cups
+            data_type: varchar
+            description: >
+              CUPS code of the supply point.
+            data_tests:
+              - not_null
+
+          - name: distributorCdos
+            data_type: varchar
+            description: >
+              Distributor’s CDOS code for regulatory identification.
+            data_tests:
+              - not_null
+
+          - name: distributorId
+            data_type: varchar
+            description: >
+              Unique identifier of the distributor responsible for the supply point.
+            data_tests:
+              - not_null
+
+          - name: lineCode
+            data_type: varchar
+            description: >
+              Code of the electrical line feeding the supply point.
+
+          - name: measureTensionLevel
+            data_type: varchar
+            description: >
+              Voltage level at the measurement point.
+            data_tests:
+              - not_null
+
+          - name: meterSerialNumber
+            data_type: varchar
+            description: >
+              Serial number of the installed energy meter.
+            data_tests:
+              - not_null
+
+          - name: meterTechCode
+            data_type: varchar
+            description: >
+              Technical classification code of the meter.
+            data_tests:
+              - not_null
+
+          - name: meterTechName
+            data_type: varchar
+            description: >
+              Technical name of the meter model.
+            data_tests:
+              - not_null
+
+          - name: name
+            data_type: varchar
+            description: >
+              Commercial or internal name of the supply point.
+
+          - name: phase
+            data_type: varchar
+            description: >
+              Electrical phase configuration (single-phase or three-phase).
+
+          - name: pointTensionLevel
+            data_type: varchar
+            description: >
+              Voltage level of the supply point itself.
+            data_tests:
+              - not_null
+
+          - name: pointType
+            data_type: varchar
+            description: >
+              Categorization of the supply point within the distribution network.
+
+          - name: recognizedPower
+            data_type: integer
+            description: >
+              Recognized electrical power associated with the supply point.
+            data_tests:
+              - not_null
+
+          - name: serviceType
+            data_type: varchar
+            description: >
+              Type of electrical service provided at the supply point.
+            data_tests:
+              - not_null
+
+          - name: pointType
+            data_type: varchar
+            description: >
+              Classification of the supply point according to network regulations.
+
+          - name: solarZone
+            data_type: integer
+            description: >
+              Assigned solar zone used for photovoltaic suitability and analysis.
+            data_tests:
+              - not_null
+
+          - name: tensionSection
+            data_type: float
+            description: >
+              Voltage section or segment classification for the supply point.
+            data_tests:
+              - not_null
+
+          - name: trafoCode
+            data_type: varchar
+            description: >
+              Code of the transformer serving the supply point.
+
+          - name: transNomDemand
+            data_type: float
+            description: >
+              Nominal demand associated with the transformer's connection.
+            data_tests:
+              - not_null
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Timestamp indicating when the supply point record was ingested.
+            data_tests:
+              - not_null
+        config:
+          loaded_at_field: data_ingest
+
+    config:
+      freshness:
+        warn_after: {count: 365, period: day}
+        error_after: {count: 730, period: day}

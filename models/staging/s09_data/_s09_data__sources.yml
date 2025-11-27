@@ -1,0 +1,102 @@
+version: 2
+
+sources:
+
+  - name: s09_data
+    description: >
+      Raw data containing power quality (PQ) events reported by smart meters.
+      These events include voltage dips, swells, interruptions and other PQ incidents
+      captured according to S09 file specifications.
+    schema: s09_raw_data
+    database: "PROJECT_DEV_BRONZE_DB"
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    tables:
+
+      - name: s09_raw_data
+        description: >
+          Raw S09 power quality event data containing timestamped PQ incidents,
+          classification codes, concentrator and meter identifiers, and event metadata.
+        columns:
+
+          - name: Cnc
+            data_type: varchar
+            description: >
+              Concentrator identifier (CNC) associated with the meter that reported the PQ event.
+            data_tests:
+              - not_null
+
+          - name: Cnt
+            data_type: varchar
+            description: >
+              Meter identifier (serial number or unique meter code) reporting the PQ event.
+            data_tests:
+              - not_null
+
+          - name: Fh
+            data_type: varchar
+            description: >
+              Timestamp of the power quality event in raw S09 format (e.g., YYYYMMDDHHMM).
+            data_tests:
+              - not_null
+
+          - name: Et
+            data_type: varchar
+            description: >
+              Event type code indicating the kind of PQ incident (e.g., dip, swell, interruption).
+            data_tests:
+              - not_null  
+
+          - name: C
+            data_type: varchar
+            description: >
+              Event classification or category code associated with the PQ event.
+            data_tests:
+              - not_null
+
+          - name: D1
+            data_type: varchar
+            description: >
+              Additional event descriptor, typically used for phase or voltage-related metadata or starting time.
+            data_tests:
+              - not_null
+
+          - name: D2
+            data_type: float
+            description: >
+              Event measurement value (e.g., magnitude or duration) depending on the event type.
+            data_tests:
+              - not_null
+
+          - name: file_date
+            data_type: varchar
+            description: >
+              Date when the S09 file was generated or ingested, stored in raw string format.
+            data_tests:
+              - not_null
+
+          - name: dso
+            data_type: varchar
+            description: >
+              Identifier of the Distribution System Operator (DSO) producing the S09 dataset.
+            data_tests:
+              - not_null
+
+          - name: data_ingest
+            data_type: timestamp_ltz
+            description: >
+              Timestamp marking the ingestion of the PQ event into the raw storage layer.
+            data_tests:
+              - not_null
+
+        config:
+          loaded_at_field: data_ingest
+
+    config:
+      freshness:
+        warn_after: {count: 365, period: day}
+        error_after: {count: 730, period: day}

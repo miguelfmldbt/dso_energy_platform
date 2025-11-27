@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: fct_energy
+    description: >
+      Fact table containing energy readings from concentrator and meter data.
+      Each row represents an individual energy measurement including timestamps,
+      meter identifiers, imported/exported energy, and a derived date key used
+      for joining with the date dimension.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [energy_id]
+
+    columns:
+      - name: energy_id
+        data_type: string
+        description: >
+          Unique identifier of the energy reading provided by the S02 system.
+        tests:
+          - not_null
+          - unique
+
+      - name: supplyPoint
+        data_type: string
+        description: >
+          CUPS related to the PQ event    
+
+      - name: meter_id
+        data_type: string
+        description: >
+          Identifier of the meter associated with the energy reading. May not
+          exist in the electrical, address, or supply location dimensions if the
+          meter is new, missing, or the dimension is not yet updated.
+        tests:
+          # Relationship to electrical hierarchy
+          - relationships:
+              to: ref('dim_electrical')
+              field: meter_id
+              severity: warn
+
+          # Relationship to addresses
+          - relationships:
+              to: ref('dim_addresses')
+              field: meter_id
+              severity: warn
+
+          # Relationship to supply point geolocation
+          - relationships:
+              to: ref('dim_supply_locations')
+              field: meter_id
+              severity: warn
+
+      - name: concentrator
+        data_type: string
+        description: >
+          Identifier of the concentrator device responsible for collecting
+          the meter's energy readings.
+
+      - name: date_id
+        data_type: string
+        description: >
+          Surrogate key derived from the energy timestamp (hashed date only).
+          Used to join the fact table with the dim_date dimension.
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+
+      - name: energy_timestamp
+        data_type: timestamp
+        description: >
+          Exact timestamp of the energy reading.
+
+      - name: total_energy_Wh
+        data_type: float
+        description: >
+          Net active energy imported by the customer in watt-hours, computed as
+          imported minus exported energy.

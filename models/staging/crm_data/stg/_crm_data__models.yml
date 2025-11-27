@@ -1,0 +1,1186 @@
+version: 2
+
+models:
+  - name: stg_crm_data__centers
+    description: >
+      Table representing electrical secondary substations (CT).
+      Each center belongs uniquely to a distributor (DSO).
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [ct_id]
+    columns:
+      - name: ct_id
+        description: >
+          Surrogate key of the center (CT), generated as MD5(ct_code || dso_id).
+          Ensures uniqueness of a center inside a DSO.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dso_id
+        description: >
+          Distributor identifier (DSO) that owns the CT.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__distributors')
+                field: dso_id
+      - name: ct_code
+        description: >
+          Code of the CT.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: ct_name
+        description: >
+          Name of the CT.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__addresses
+    description: >
+      Standardized and normalized address dimension. Extracts and cleans street,
+      town and postal code information from CRM supply points.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [address_id]
+
+    columns:
+
+      - name: address_id
+        description: "Surrogate key for the address record generated with MD5(address JSON)."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: street_id
+        description: "Surrogate key representing the unique street within a town and postal code."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__streets')
+                field: street_id
+      - name: number
+        description: "Street number of the address."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: portal
+        description: "Portal or building entrance identifier."
+        data_type: varchar
+
+      - name: floor
+        description: "Floor of the residence or office."
+        data_type: varchar
+
+      - name: letter
+        description: "Letter or apartment identifier."
+        data_type: varchar
+
+      - name: type_address
+        description: "Type of address (street, avenue, square...)."
+        data_type: varchar
+
+      - name: phone
+        description: "Hashed phone number using MD5 for privacy preservation."
+        data_type: varchar
+
+  - name: stg_crm_data__cnmc_solars
+    description: >
+      Dimension table that standardizes CNMC solar classification metadata.
+      Each row represents a unique CNMC solar type extracted from self-consumption
+      contract information.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [cnmc_type_id]
+    columns:
+      - name: cnmc_type_id
+        description: >
+          Surrogate primary key generated as MD5 hash of the raw cnmc_solar field.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: cnmc_type_desc
+        description: >
+          Text description of the CNMC solar type.
+        data_type: varchar
+
+      - name: cnmc_type_name
+        description: >
+          Internal CNMC type name represented as an integer code.
+        data_type: integer
+
+  - name: stg_crm_data__configurationtypes
+    description: >
+      Table containing the normalized configuration types coming from
+      the self-consumption CRM source. 
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [config_id]
+
+    columns:
+      - name: config_id
+        description: >
+          Surrogate key generated as MD5 hash of the original configuration type.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: configuration_type
+        description: >
+          High-level category describing the configuration type (parsed from JSON conf_type object).
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: conf_type_desc
+        description: >
+          Human-readable description of the configuration type.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__consumertypes
+    description: >
+      Table containing consumer type information extracted from
+      the base self-consumption dataset. Each record represents a distinct
+      consumer type classification defined by the distributor.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [consumer_type_id]
+
+    columns:
+      - name: consumer_type_id
+        description: >
+          Surrogate key generated as MD5 hash of the raw `consumer_type` object.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: consumer_type_desc
+        description: >
+          Cleaned and standardized consumer type description extracted
+          from the raw JSON structure.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__contractowners
+    description: >
+      Table containing the owner information for energy contracts.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contract_owner_id]
+
+    columns:
+      - name: contract_owner_id
+        description: >
+          Surrogate key (MD5 hash) uniquely identifying each contract owner.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: owner_id
+        description: >
+          Surrogate key representing the owner's fiscal identifier
+          (hashed from responsibleEnergyContract:fiscalId).
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: owner_name
+        description: >
+          Full name of the contract owner, extracted from the nested JSON structure.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__contracts
+    description: >
+      Curated (silver) contracts.   Represents the business contract linked to a supply point.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contract_id]
+
+    columns:
+      - name: contract_id
+        description: "Natural contract identifier from the source system"
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: contracted_power_id
+        description: "Surrogate key referencing the contracted power dimension"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__contractspower')
+                field: contracted_power_id
+      - name: economic_activity_id
+        description: "Surrogate key referencing the economic activity dimension"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__econmactivities')
+                field: economic_activity_id
+      - name: energy_provider_id
+        description: "Surrogate key referencing the energy providers dimension"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__energyproviders')
+                field: energy_provider_id
+      - name: contract_owner_id
+        description: "Surrogate key referencing the contract owners dimension"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__contractowners')
+                field: contract_owner_id
+      - name: tariff_id
+        description: "Surrogate key referencing the tariff dimension"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__tariffs')
+                field: tariff_id
+      - name: supplyPoint
+        description: "Supply point linked to the contract"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__supply_points')
+                field: supplyPoint
+      - name: end_date
+        description: "UTC-normalized contract end timestamp"
+        data_type: timestamp_tz
+
+      - name: init_date
+        description: "UTC-normalized contract start timestamp"
+        data_type: timestamp_tz
+        data_tests:
+          - not_null
+
+      - name: contract_status
+        description: "Status of the contract in the CRM system"
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__contractspower
+    description: >
+      Table containing the contracted power per regulatory period
+      extracted from CRM contracts.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [contracted_power_id]
+
+    columns:
+      - name: contracted_power_id
+        description: >
+          Surrogate key generated as the MD5 hash of the entire contractedPower JSON.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: p1
+        description: >
+          Contracted power for period P1.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: p2
+        description: >
+          Contracted power for period P2.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: p3
+        description: >
+          Contracted power for period P3.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: p4
+        description: >
+          Contracted power for period P4.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: p5
+        description: >
+          Contracted power for period P5.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: p6
+        description: >
+          Contracted power for period P6.
+        data_type: integer
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__distributors
+    description: >
+      Table containing the list of electricity distributors (DSO).
+
+    config:
+      contract:
+        enforced: true
+    constraints:
+      - type: primary_key
+        columns: [dso_id]
+
+    columns:
+      - name: dso_id
+        description: "Unique identifier for the electricity distributor (DSO)."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: dso_name
+        description: "Human-readable name of the electricity distributor."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__econmactivities
+    description: >
+      Normalized economic activity dimension extracted from CRM contracts.
+
+    config:
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [economic_activity_id]
+
+    columns:
+      - name: economic_activity_id
+        description: >
+          Surrogate key (MD5 hash) derived from the full economicActivity object.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: cnae
+        description: >
+          CNAE numeric identifier (Código Nacional de Actividades Económicas).
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: cnae_desc
+        description: >
+          Full description of the economic activity according to CNAE.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: cnae_group
+        description: >
+          CNAE group to which the activity belongs (high-level classification).
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__energyproviders
+    description: >
+      Table that standardizes energy provider information extracted
+      from CRM contracts.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [energy_provider_id]
+
+    columns:
+      - name: energy_provider_id
+        description: >
+          Surrogate key (MD5 hash) that uniquely identifies each energy provider.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: energy_provider_name
+        description: >
+          Name of the energy provider as provided in the CRM source system.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__geograph_points
+    description: >
+      Curated (silver) version of geographic coordinates for supply points (Punto DC).
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
+
+    columns:
+      - name: supplyPoint
+        description: >
+          Natural primary key identifying the supply point associated with the geographic coordinates.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              config:
+                severity: warn
+              arguments:
+                field: supplyPoint
+                to: ref('stg_crm_data__supply_points')
+      - name: x_coord
+        description: >
+          X coordinate (longitude) in float format after normalization from comma decimal format.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: y_coord
+        description: >
+          Y coordinate (latitude) in float format after normalization from comma decimal format.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: z_coord
+        description: >
+          Z coordinate (elevation) in float format after normalization from comma decimal format. Could be missing
+        data_type: float
+
+      - name: data_ingest
+        description: >
+          Timestamp (in UTC) indicating when the data batch was ingested into Bronze.
+        data_type: timestamp_tz
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__lines
+    description: >
+      Normalized line dimension. Each record represents a unique distribution
+      line belonging to a transformer.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [line_id]
+
+    columns:
+      - name: line_id
+        description: >
+          Surrogate primary key for the line, generated as an MD5 hash from
+          (line_code, transformer_code, ct_code, dso_id).
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: transformer_id
+        description: >
+          Foreign key linking the line to the transformer it belongs to.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__transformers')
+                field: transformer_id
+      - name: line_code
+        description: >
+          Business identifier for the line as received from CRM. May contain  numeric or alphanumeric values.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__measure_points
+    description: >
+      Table containing the normalized measurement point types,
+      which define the tension level and tension section associated with each supply point.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [measure_point_id]
+
+    columns:
+      - name: measure_point_id
+        description: >
+          Surrogate key (MD5) representing each unique combination of
+          tension level and tension section.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: measure_tension_level
+        description: >
+          Voltage level measurement classification of the supply point.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: tension_section
+        description: >
+          Nominal tension section value expressed as a numeric value.
+        data_type: float
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__meter_technologies
+    description: >
+      Table containing the list of meter technology types.
+      Each record represents a unique combination of meter technology name and code.
+
+    config:
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [meter_tech_id]
+
+    columns:
+      - name: meter_tech_id
+        description: >
+          Surrogate key generated from the meter technology name.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: meter_tech_name
+        description: >
+          Human-readable name describing the technology used by the smart meter.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: meter_tech_code
+        description: >
+          Technical identifier or manufacturer code defining the meter technology.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__meters
+    description: >
+      Normalized meter dimension containing the surrogate key (meter__supply_id),  technology reference, and the natural meter code.
+
+    config:
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [meter_supply_id]
+
+    columns:
+      - name: meter_supply_id
+        description: >
+          Primary key for each unique meter & supply point
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: meter_id
+        description: >
+          Surrogate key for each unique meter, generated as MD5(dso_name || meter_code).
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: meter_tech_id
+        description: >
+          Foreign key referencing the meter technology dimension.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__meter_technologies')
+                field: meter_tech_id
+      - name: meter_code
+        description: >
+          Natural identifier of the smart meter as provided by the distributor.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__municipalities
+    description: >
+      Normalized municipality dimension containing municipality name and INE code,
+      each linked to a province via a surrogate key. Derived from CRM supply points data.
+
+    config:
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [municipality_id]
+
+    columns:
+      - name: municipality_id
+        description: "Surrogate key for municipality generated by hashing name and INE code."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: province_id
+        description: "Surrogate key of the associated province."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__provinces')
+                field: province_id
+      - name: municipality_name
+        description: "Normalized municipality name in title case."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: municipality_ine_code
+        description: "Official INE municipality code."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__provinces
+    description: "Dimension table containing the list of Spanish provinces derived from supply points."
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [province_id]
+
+    columns:
+      - name: province_id
+        description: "Surrogate key generated as MD5(province_name || '|' || province_ine_code)."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: province_name
+        description: "Normalized province name extracted from JSON address fields."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: province_ine_code
+        description: "Official INE province code extracted from the source address."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__selfconsumption_statuses
+    description: >
+      Table containing the different self-consumption status types.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [selfconsumption_status_id]
+
+    columns:
+      - name: selfconsumption_status_id
+        description: >
+          Surrogate key representing each unique self-consumption status.
+          Generated as an MD5 hash of the raw status structure.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+
+      - name: status_name
+        description: >
+          Human-readable name describing the current self-consumption status
+          (e.g. Active, Pending, Cancelled).
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__selfconsumptions
+    description: >
+      Flattened and curated (silver) model of self-consumption data.
+      Expands the array of CUPS to produce one record per supply point.
+      Generates surrogate keys referencing configuration, consumer type,  solar zone, self-consumption status, and CNMC solar classifications.
+
+    config:
+      meta:
+        contracts:
+          enforced: true
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
+
+    columns:
+
+      - name: supplyPoint
+        description: >
+          Natural key of the supply point extracted from the flattened CUPS array.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              severity: warn
+              arguments:
+                to: ref('stg_crm_data__contracts')
+                field: supplyPoint
+      
+      - name: config_id
+        description: >
+          Surrogate key referencing the configuration type dimension.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__configurationtypes')
+                field: config_id
+      - name: consumer_type_id
+        description: >
+          Surrogate key referencing the consumer type dimension.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__consumertypes')
+                field: consumer_type_id
+      - name: solar_zone_id
+        description: >
+          Surrogate key referencing the solar zone dimension.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__solarzones')
+                field: solar_zone_id
+      - name: selfconsumption_status_id
+        description: >
+          Surrogate key referencing the self-consumption status dimension.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__selfconsumption_statuses')
+                field: selfconsumption_status_id
+      - name: cnmc_type_id
+        description: >
+          Surrogate key referencing the CNMC-solar classification.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__cnmc_solars')
+                field: cnmc_type_id
+      - name: selfconsumption_id
+        description: >
+          Business identifier of the self-consumption system.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: cau_ID
+        description: >
+          CAU identifier associated with the self-consumption installation.
+        data_type: varchar
+
+      - name: compensation
+        description: >
+          Indicates whether energy compensation is enabled.
+        data_type: boolean
+        data_tests:
+          - not_null
+
+      - name: connection_type
+        description: >
+          Indicates the physical connection type of the installation.
+        data_type: varchar
+
+      - name: init_date
+        description: >
+          UTC timestamp when the self-consumption installation started operating.
+        data_type: timestamp_tz
+        data_tests:
+          - not_null
+
+      - name: end_date
+        description: >
+          UTC timestamp when the self-consumption installation ended (if applicable).
+        data_type: timestamp_tz
+
+      - name: excedents
+        description: >
+          Indicates whether the installation generates excess power.
+        data_type: boolean
+
+      - name: generation_pot
+        description: >
+          Installed generation capacity of the installation.
+        data_type: float
+
+      - name: selfconsumption_owner
+        description: >
+          Surrogate hash of the owner’s name used for anonymization.
+        data_type: varchar
+
+  - name: stg_crm_data__solarzones
+    description: >
+      Table containing standardized information about solar zones
+      extracted from the self-consumption raw dataset. Each record uniquely
+      identifies a solar zone and its attributes.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [solar_zone_id]
+
+    columns:
+      - name: solar_zone_id
+        description: >
+          Surrogate key generated from the raw solar_zone structure.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: solar_zone_name
+        description: >
+          Human–readable name of the solar zone.
+        data_type: varchar
+
+      - name: solar_zone_number
+        description: >
+          Numeric identifier representing the solar zone.
+        data_type: integer
+
+  - name: stg_crm_data__streets
+    description: >
+      Street dimension generated from CRM supply point addresses.
+      Each street is uniquely defined by its name, town and postal code.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [street_id]
+
+    columns:
+      - name: street_id
+        description: "Surrogate key for the street (MD5 of name + town + postal code)."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: town_id
+        description: "Foreign key referencing the normalized town dimension."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__towns')
+                field: town_id
+
+      - name: postal_code
+        description: "Postal code associated with the address."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: street_name
+        description: "Human-readable street name extracted and cleaned from the raw JSON address."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__supply_points
+    description: >
+      Normalized supply point dimension containing the foreign keys to the
+      electrical network hierarchy (line → transformer → center → distributor),
+      the address surrogate key, the measure point surrogate key and the meter
+      surrogate key.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [supplyPoint]
+
+    columns:
+      - name: supplyPoint
+        data_type: varchar
+        description: >
+          Natural identifier of the supply point (CUPS). Primary key.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: address_id
+        data_type: varchar
+        description: >
+          Surrogate key referencing the normalized address table.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__addresses')
+                field: address_id
+      - name: line_id
+        data_type: varchar
+        description: >
+          Surrogate key referencing the normalized electric lines table.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__lines')
+                field: line_id
+      - name: measure_point_id
+        data_type: varchar
+        description: >
+          Surrogate key referencing the measure point dimension.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__measure_points')
+                field: measure_point_id
+      - name: meter_supply_id
+        data_type: varchar
+        description: >
+          Surrogate key referencing the smart meter dimension.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__meters')
+                field: meter_supply_id
+      - name: phase
+        data_type: varchar
+        description: >
+          Electrical phase of the supply point (single-phase or three-phase).
+        data_tests:
+          - not_null
+
+      - name: point_type
+        data_type: varchar
+        description: >
+          Type of supply point (e.g. consumption, generation, mixed).
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__tariffs
+    description: >
+      Table containing the standardized set of tariffs derived from CRM contract data.
+      Each tariff receives a deterministic surrogate key.
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [tariff_id]
+
+    columns:
+      - name: tariff_id
+        description: "Surrogate key generated by hashing the raw tariff descriptor."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: tariff
+        description: "Original tariff code as provided in CRM contract data."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__towns
+    description: "Normalized town dimension extracted from supply point addresses."
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [town_id]
+
+    columns:
+      - name: town_id
+        description: "Surrogate key for the town, generated as MD5 of town, municipality name, and INE code."
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: municipality_id
+        description: "Foreign key referencing the municipality entity."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__municipalities')
+                field: municipality_id
+      - name: town_name
+        description: "Standardized town name extracted from the supply point address."
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: stg_crm_data__transformers
+    description: >
+      Table representing electrical transformers.   Each transformer belongs to a single center (CT).
+
+    config:
+      contract:
+        enforced: true
+      meta:
+        constraints:
+          - type: primary_key
+            columns: [transformer_id]
+
+    columns:
+      - name: transformer_id
+        description: >
+          Surrogate key (MD5 hash) uniquely identifying each transformer.   Generated from transformer_code, ct_code and dso_id.
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+
+      - name: ct_id
+        description: >
+          Foreign key referencing the center (CT) the transformer is linked to.
+        data_type: varchar
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__centers')
+                field: ct_id
+      - name: transformer_code
+        description: >
+          Original transformer code provided by the distributor.
+        data_type: varchar
+        tests:
+          - not_null

@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: s09
+    description: >
+      Curated (silver) version of Power Quality (PQ) event data.  Includes type casting, standardized field names, and UTC timestamps.
+    config:
+      meta:
+        contracts:
+          enforced: true
+    constraints:
+      - type: primary_key
+        columns: [quality_event_id]
+    columns:
+      - name: quality_event_id
+        data_type: varchar
+        description: >
+          UUID of each PQ event
+        data_tests:
+          - unique
+          - not_null
+
+      - name: meter_id
+        data_type: varchar
+        description: >
+          Surrogate key of the smart meter that registered the PQ event.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_crm_data__meters')
+                field: meter_id
+        constraints:
+          - type: foreign_key
+            to: ref('stg_crm_data__meters')
+            column: meter_id
+
+      - name: concentrator
+        data_type: varchar
+        description: >
+          Identifier of the concentrator device that aggregated this event.
+        data_tests:
+          - not_null
+
+      - name: meter_code
+        data_type: varchar
+        description: >
+          Identifier of the meter that register meter events
+        data_tests:
+          - not_null    
+
+      - name: quality_event_timestamp
+        data_type: timestamp_tz
+        description: >
+          Timestamp when the PQ event finished, normalized to UTC.
+        data_tests:
+          - not_null
+
+      - name: quality_event_group
+        data_type: integer
+        description: >
+          Category of the PQ event.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: quality_event_group >= 0
+
+      - name: quality_event_type
+        data_type: integer
+        description: >
+          Subcategory of the PQ event.
+        data_tests:
+          - not_null
+        constraints:
+          - type: check
+            expression: quality_event_group >= 0
+
+      - name: quality_event_start
+        data_type: timestamp_tz
+        description: >
+          Timestamp when the PQ event started, normalized to UTC.
+        data_tests:
+          - not_null
+
+      - name: data_ingest
+        data_type: timestamp_tz
+        description: >
+          Timestamp when the raw S09 data was ingested into bronze (UTC).
+        data_tests:
+          - not_null
