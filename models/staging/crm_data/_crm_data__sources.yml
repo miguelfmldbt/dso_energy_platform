@@ -159,6 +159,8 @@ sources:
           loaded_at_field: data_ingest
 
       - name: punto_dc
+        description: >
+          Geo-referenced points like supplyPoints used by the DSO to determine location
         columns:
           - name: CUPS
             data_type: varchar
@@ -192,6 +194,8 @@ sources:
           loaded_at_field: data_ingest
 
       - name: selfconsumption
+        description: >
+          Information about selfconsumption units asociated to contracts users
         columns:
           - name: id
             data_type: varchar
@@ -379,6 +383,8 @@ sources:
           loaded_at_field: data_ingest
 
       - name: supply_points
+        description: >
+          Information related to the different supply points. Describes where the supply point is, address, electrical info...
         columns:
           - name: id
             data_type: varchar

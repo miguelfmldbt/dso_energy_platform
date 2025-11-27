@@ -4,18 +4,25 @@
     )
 }}
 
-WITH stg_meters AS (
+WITH stg_contracts AS (
     SELECT
-        meter_supply_id,
-        meter_id
-    FROM {{ ref('stg_crm_data__meters') }}
+        supplyPoint
+    FROM {{ ref('stg_crm_data__contracts') }}
 ),
 
 stg_supplypoints AS (
     SELECT
+        supplyPoint,
         meter_supply_id,
         address_id
     FROM {{ ref('stg_crm_data__supply_points') }}
+),
+
+stg_meters AS (
+    SELECT
+        meter_supply_id,
+        meter_id
+    FROM {{ ref('stg_crm_data__meters') }}
 ),
 
 stg_addresses AS (
@@ -57,22 +64,30 @@ stg_provinces AS (
 
 dim_addresses AS (
     SELECT
-        MD5(stg_meters.meter_supply_id || '|' || stg_addresses.street_id || '|' || stg_streets.town_id || '|' || stg_municipalities.municipality_id || '|' || stg_provinces.province_id) AS dim_addresses_id,
+        stg_addresses.address_id AS dim_addresses_id,
         stg_meters.meter_id,
         stg_towns.town_name,
         stg_municipalities.municipality_name,
         stg_provinces.province_name
-    FROM stg_supplypoints
+    FROM stg_contracts
+    LEFT JOIN stg_supplypoints
+        ON stg_contracts.supplyPoint = stg_supplypoints.supplyPoint
+
     LEFT JOIN stg_meters
-        ON stg_supplypoints.meter_supply_id = stg_meters.meter_supply_id
+        ON stg_supplypoints.meter_supply_id = stg_meters.meter_supply_id    
+
     LEFT JOIN stg_addresses
         ON stg_supplypoints.address_id = stg_addresses.address_id
+
     LEFT JOIN stg_streets
         ON stg_addresses.street_id = stg_streets.street_id
+
     LEFT JOIN stg_towns
         ON stg_streets.town_id = stg_towns.town_id
+
     LEFT JOIN stg_municipalities
         ON stg_towns.municipality_id = stg_municipalities.municipality_id
+
     LEFT JOIN stg_provinces
         ON stg_municipalities.province_id = stg_provinces.province_id    
 )

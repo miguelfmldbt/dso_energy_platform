@@ -25,6 +25,11 @@ models:
           - not_null
           - unique
 
+      - name: supplyPoint
+        data_type: string
+        description: >
+          CUPS related to the PQ event    
+
       - name: meter_id
         data_type: string
         description: >
@@ -49,11 +54,6 @@ models:
               to: ref('dim_supply_locations')
               field: meter_id
               severity: warn
-
-      - name: meter_code
-        data_type: string
-        description: >
-          Code representing the meter within the S02 system.
 
       - name: concentrator
         data_type: string

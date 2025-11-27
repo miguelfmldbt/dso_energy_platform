@@ -202,6 +202,12 @@ models:
           Identifier of the physical electricity meter associated with the
           supply point. Represents the final measurement device in the network.
 
+      - name: meter_id
+        data_type: string
+        description: >
+          Name of the physical electricity meter associated with the
+          supply point. Represents the final measurement device in the network.
+
       - name: line_code
         data_type: string
         description: >
@@ -252,14 +258,6 @@ models:
         tests:
           - not_null
           - unique
-
-      - name: supplyPoint
-        data_type: string
-        description: >
-          Business identifier for the supply point. Represents the physical
-          connection location within the electrical network.
-        tests:
-          - not_null
 
       - name: meter_id
         data_type: string

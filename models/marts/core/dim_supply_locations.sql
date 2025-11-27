@@ -4,11 +4,10 @@
     )
 }}
 
-WITH stg_meters AS (
+WITH stg_contracts AS (
     SELECT
-        meter_supply_id,
-        meter_id
-    FROM {{ ref('stg_crm_data__meters') }}
+        supplyPoint
+    FROM {{ ref('stg_crm_data__contracts') }}
 ),
 
 stg_supplypoints AS (
@@ -16,6 +15,13 @@ stg_supplypoints AS (
         supplyPoint,
         meter_supply_id
     FROM {{ ref('stg_crm_data__supply_points') }}
+),
+
+stg_meters AS (
+    SELECT
+        meter_supply_id,
+        meter_id
+    FROM {{ ref('stg_crm_data__meters') }}
 ),
 
 stg_geograph AS (
@@ -31,19 +37,22 @@ stg_geograph AS (
 
 dim_supply_locations AS (
     SELECT
-        MD5(stg_supplypoints.supplyPoint) AS dim_supply_locations_id,
-        stg_supplypoints.supplyPoint,
+        MD5(stg_contracts.supplyPoint) AS dim_supply_locations_id,
         stg_meters.meter_id,
         stg_geograph.x_coord,
         stg_geograph.y_coord,
         stg_geograph.z_coord,
         stg_geograph.latitude,
         stg_geograph.longitude
-    FROM stg_supplypoints
+    FROM stg_contracts
+    LEFT JOIN stg_supplypoints
+        ON stg_contracts.supplyPoint = stg_supplypoints.supplyPoint
+
     LEFT JOIN stg_meters
         ON stg_supplypoints.meter_supply_id = stg_meters.meter_supply_id
+
     LEFT JOIN stg_geograph
-        ON stg_supplypoints.supplyPoint = stg_geograph.supplyPoint
+        ON stg_contracts.supplyPoint = stg_geograph.supplyPoint
 )
 
 SELECT *

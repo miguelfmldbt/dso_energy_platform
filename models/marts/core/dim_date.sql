@@ -1,5 +1,5 @@
 WITH date_gen AS (
-    {{ dbt_date.get_date_dimension("2025-09-29", "2026-01-31") }}
+    {{ dbt_date.get_date_dimension("2025-09-27", "2026-01-31") }}
 ),
 date_cte AS (
     SELECT
