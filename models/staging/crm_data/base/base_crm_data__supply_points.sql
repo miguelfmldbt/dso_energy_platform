@@ -1,6 +1,4 @@
 
-{{ config(materialized='table') }}
-
 WITH src_supplypoints AS (
     SELECT * 
     FROM {{ source('crm_data', 'supply_points') }}
